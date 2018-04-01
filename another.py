@@ -1,4 +1,4 @@
-colors = ["blue","red","yellow"]
+colors = ["blue","red"]
 i=0
 
 while i < len(colors):
