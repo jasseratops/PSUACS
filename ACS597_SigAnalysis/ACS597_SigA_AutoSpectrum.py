@@ -7,7 +7,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy import pi, sin, cos, tan, exp, genfromtext
+from numpy import pi, sin, cos, tan, exp, genfromtxt
 
 
 foldername = "C:/Users/alshehrj/PycharmProjects/PSUACS/ACS597_SigAnalysis/TRAC1_and_3/"
@@ -66,7 +66,7 @@ def grind(filename):
     plt.plot(t,x_time)
     plt.title("Noise, Time Domain")
     plt.xlabel("Time [s]")
-    plt.ylabel("Amplitude [DU]")
+    plt.ylabel("Amplitude [WU]")
     plt.xlim(t[0],t[-1])
 
 

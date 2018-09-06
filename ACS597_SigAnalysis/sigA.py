@@ -17,7 +17,7 @@ def param(N,fs,show=True):
     T = float(N)/float(fs)
     if show:
         print "N: " + str(N)
-        print u"\N{GREEK CAPITAL LETTER DELTA}" + "t: " + str(delT)`
+        print u"\N{GREEK CAPITAL LETTER DELTA}" + "t: " + str(delT)
         print u"\N{GREEK CAPITAL LETTER DELTA}" + "f: " + str(delF)
         print "fs: " + str(fs)
         print "T: " + str(T)
