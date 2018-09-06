@@ -99,8 +99,8 @@ def ssSpec(x_time,fs):
     return Gxx
 
 def window(type, N):
-    n = np.arange(N)
-    vec = float(n)/float(N)
+    n = np.asfarray(np.arange(N))
+    vec = n/N
     if type == "uniform":
         win = np.ones(N)
     elif type == "hann":
