@@ -45,8 +45,6 @@ def check(x_time,fs):
         print "Array size: " + str(length)
         print "Array too small"
 
-
-
 def linSpec(x_time,fs):
     N = len(x_time)
     delT, _, _ = param(N, fs, False)
@@ -69,7 +67,6 @@ def rms(x_time,show=True):
         print "rms: " + str(rms_x_time)
 
     return rms_x_time, ms_x_time, m_x_time
-
 
 def PnN_LinSpec(x_time,fs):
     N = len(x_time)
@@ -100,6 +97,19 @@ def ssSpec(x_time,fs):
             Gxx[i] = (Gxx[i])*2
 
     return Gxx
+
+def window(type, N):
+    n = np.arange(N)
+    vec = float(n)/float(N)
+    if type == "uniform":
+        win = np.ones(N)
+    elif type == "hann":
+        win = 1-cos(2*pi*vec)
+    elif type == "flat top":
+        win = 1-(1.93*cos(2*pi*vec))+(1.29*cos(4*pi*vec))\
+              -(0.388*cos(6*pi*vec))+(0.322*cos(8*pi*vec))
+
+    return win
 
 def play(x_time,fs):
     normFactor = 0.8/max(x_time)
