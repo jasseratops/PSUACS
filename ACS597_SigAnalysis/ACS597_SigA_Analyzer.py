@@ -44,12 +44,18 @@ def main(args):
     plt.title("Time Domain (whistling at 1kHz)")
     plt.xlabel("Time [s]")
     plt.ylabel("Amplitude [WU]")
+    plt.grid(True, which="major")
+    plt.minorticks_on()
+    plt.xlim(t[0],t[-1])
 
     plt.subplot(212)
     plt.semilogy(freq[0:len(Gxx)],Gxx)
     plt.title("Freq. Domain (whistling at 1kHz)")
     plt.xlabel("Frequency [Hz]")
-    plt.ylabel("Amplitude [WU^2 / Hz ???]")
+    plt.ylabel(r"Amplitude [${WU^2}$/ Hz]")
+    plt.xlim(freq[0],freq[len(Gxx)])
+    plt.grid(True, which="both")
+    plt.minorticks_on()
     plt.show()
 
     return 0

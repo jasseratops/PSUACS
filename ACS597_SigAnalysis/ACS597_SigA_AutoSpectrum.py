@@ -8,9 +8,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy import pi, sin, cos, tan, exp, genfromtxt
+import sigA
+import sounddevice as sd
 
-
-foldername = "C:/Users/alshehrj/PycharmProjects/PSUACS/ACS597_SigAnalysis/TRAC1_and_3/"
+foldername = "/Users/macbookpro/PycharmProjects/PSUACS/ACS597_SigAnalysis/TRAC1_and_3/"
 
 def main(args):
     #grind('TRAC1_noise_time.csv')
@@ -45,9 +46,9 @@ def grind(filename):
     _,delF,T = sigA.param(N,fs)
     freq = sigA.freqVec(N,fs)
 
-    sigA.play(x_time,fs)
+    sd.play(0.1*x_time,fs, blocking=True)
 
-    posLim = (len(freq)/2) + 1
+    GxxLim = (len(freq)/2) + 1
 
     rms,ms,m = sigA.rms(x_time)
 
@@ -60,6 +61,8 @@ def grind(filename):
 
     print "SxxRMS: " + str(SxxRMS)
     print "GxxRMS: " + str(GxxRMS)
+    print "Amp_pk" + str(max(x_time))
+    print "Amp_rms" + str(max(x_time)/np.sqrt(2.0))
 
 
     plt.figure()
@@ -71,10 +74,14 @@ def grind(filename):
 
 
     plt.figure()
-    plt.plot(freq[:posLim],abs(lsp[:posLim]),label="lsp")
-    plt.plot(freq[:posLim],Sxx[:posLim],label="Sxx")
-    plt.plot(freq[:posLim],Gxx[:posLim],label="Gxx")
+    #plt.plot(freq[:posLim],abs(lsp[:posLim]),label="lsp")
+    #plt.plot(freq[:posLim],Sxx[:posLim],label="Sxx")
+    plt.plot(freq[:GxxLim],Gxx[:GxxLim])
+    plt.title("Noise, Frequency Domain")
+    plt.xlabel("Frequency [Hz]")
+    plt.ylabel(r"Amplitude [${WU^2}$/ Hz]")
     #plt.plot(freq[:len(Gxx)-1],Gxx)
+    plt.xlim(freq[0],freq[GxxLim])
     plt.legend()
     plt.show()
 
@@ -82,4 +89,3 @@ def grind(filename):
 if __name__ == '__main__':
     import sys
     sys.exit(main(sys.argv))
-
