@@ -12,6 +12,7 @@ import sounddevice as sd
 import sigA
 import random as rn
 import scipy.signal as sig
+import time
 
 def main(args):
     fs = 44100.00
@@ -21,7 +22,7 @@ def main(args):
     t= sigA.timeVec(N=N,fs=fs)
     freq = sigA.freqVec(N=N, fs=fs)
 
-
+    time.sleep(1)
     #####
     print "Starting Recording"
     recArray = sd.rec(frames=2*N,samplerate=fs,channels=1,blocking=True)[N:]
