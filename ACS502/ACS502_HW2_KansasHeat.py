@@ -17,7 +17,7 @@ C = 4.186E3         # J/kg
 rho0 = 1.21         # kg/m^3
 c0 = 343.0          # m/s
 
-prms = (Pref*(10**(SPL/20)))#/np.sqrt(2)
+prms = (Pref*(10**(SPL/20)))/np.sqrt(2)
 
 print "Prms: " + str(prms)
 
@@ -25,17 +25,13 @@ Q = m*C*dT
 
 print "Q: " + str(Q)
 
-IL = SPL - 0.16
-I = Iref*(10**(IL/10.0))
-I2 = (prms**2)/(rho0*c0)
+I = (prms**2)/(rho0*c0)
 
-print "IL: " + str(IL)
 print "I: " + str(I)
-print "I2: " + str(I2)
 
 S = pi*(r**2)
 
-W = I2*S
+W = I*S
 
 print "S: " + str(S)
 print "W: " + str(W)

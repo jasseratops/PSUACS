@@ -37,6 +37,9 @@ cEarth = 343.0
 lamLow = cEarth/20.0
 lamHigh = cEarth/(20.0E3)
 
+print lamLow
+print lamHigh
+
 frqLow = c/lamLow
 frqHigh = c/lamHigh
 

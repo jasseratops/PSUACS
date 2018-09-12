@@ -45,3 +45,5 @@ IL = 10.0*np.log10(I/Iref)
 
 print "Iref: " + str(Iref)
 print "IL: " + str(IL)
+
+print SPL-IL
