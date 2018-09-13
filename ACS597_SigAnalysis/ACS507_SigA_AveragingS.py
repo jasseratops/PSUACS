@@ -13,7 +13,8 @@ import wave
 import sounddevice as sd
 import sigA
 
-folder = "C:/Users/alshehrj/PycharmProjects/PSUACS/ACS597_SigAnalysis/"
+#folder = "C:/Users/alshehrj/PycharmProjects/PSUACS/ACS597_SigAnalysis/"
+folder = "/Users/macbookpro/PycharmProjects/PSUACS/ACS597_SigAnalysis/HW3/"
 
 
 def ssSpecAvg(x_time, fs, N, Nl, syncStep):
@@ -32,11 +33,11 @@ def ssSpecAvg(x_time, fs, N, Nl, syncStep):
     return GxxAvg, freqAvg, delF_Avg, Gxx
 
 def lSpecAvg(x_time, fs, N, Nl, syncStep):
-    lSpec = np.zeros((Nl, N / 2))
+    lSpec = np.zeros((Nl, N),dtype=complex)
 
     for i in range(Nl):
         n = i * (N+syncStep)
-        lSpec[i] = sigA.linSpec(x_time[n:n + N - 1], fs)
+        lSpec[i] = sigA.linSpec(x_time[n:n + N], fs)
 
     freqAvg = sigA.freqVec(N, fs)
     #### lSpec Avg
@@ -48,14 +49,13 @@ def lSpecAvg(x_time, fs, N, Nl, syncStep):
 
 def main(args):
     #GxxComp("S_plus_N_20.wav",0)
+    #GxxComp("P_plus_N_10.wav",)
     GxxComp("P_plus_N_10.wav",87)
 
 
-
-def GxxComp(filename,syncStep):
+def GxxComp(filename,syncStep=0):
     path = folder+filename
     print path
-
 
     fs , data = wavfile.read(path)
 
@@ -76,11 +76,16 @@ def GxxComp(filename,syncStep):
     Nl = 200
 
     GxxAvg, freqAvg, delF_Avg, Gxx = ssSpecAvg(data,fs,N,Nl,syncStep)
-
+    lspAvg, freqLsAvg,delFlSpecAvg, lSpec = lSpecAvg(data,fs,N,Nl,syncStep)
 
     plt.figure()
     plt.plot(freqAvg[:len(GxxAvg)],GxxAvg)
     #plt.plot(freqAvg[:len(GxxAvg)],Gxx[13,])
+    plt.title("GxxAvg")
+
+    plt.figure()
+    plt.plot(freqLsAvg[:len(freqLsAvg)/2],lspAvg[:len(freqLsAvg)/2])
+    plt.title("lspAvg")
 
     rmsAvg = np.sum(GxxAvg) * delF_Avg
 
@@ -103,11 +108,12 @@ def GxxComp(filename,syncStep):
 
     plt.figure()
     plt.plot(freqTot[:len(GxxTot)],GxxTot)
+    plt.title("GxxTot")
     plt.show()
 
     return 0
 
-def timeAvg(filename,syncStep):
+#def timeAvg(filename,syncStep):
 
 
 
