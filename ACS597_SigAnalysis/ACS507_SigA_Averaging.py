@@ -15,15 +15,47 @@ import sigA
 
 folder = "C:/Users/alshehrj/PycharmProjects/PSUACS/ACS597_SigAnalysis/"
 
-def main(args):
-    function("S_plus_N_20.wav")
-    #function("P_plus_N_10.wav")
 
-def function(filename):
+def ssSpecAvg(x_time, fs, N, Nl, syncStep):
+    Gxx = np.zeros((Nl, N / 2))
+
+    for i in range(Nl):
+        n = i * (N+syncStep)
+        Gxx[i] = sigA.ssSpec(x_time[n:n + N - 1], fs)
+
+    freqAvg = sigA.freqVec(N, fs)
+    #### Gxx Avg
+    GxxAvg = np.mean(Gxx, axis=0)
+
+    _, delF_Avg, _ = sigA.param(N, fs, show=True)
+
+    return GxxAvg, freqAvg, delF_Avg, Gxx
+
+def lSpecAvg(x_time, fs, N, Nl, syncStep):
+    lSpec = np.zeros((Nl, N / 2))
+
+    for i in range(Nl):
+        n = i * (N+syncStep)
+        lSpec[i] = sigA.linSpec(x_time[n:n + N - 1], fs)
+
+    freqAvg = sigA.freqVec(N, fs)
+    #### lSpec Avg
+    lSpecAvg = np.mean(lSpec, axis=0)
+
+    _, delF_Avg, _ = sigA.param(N, fs, show=True)
+
+    return lSpecAvg, freqAvg, delF_Avg, lSpec
+
+def main(args):
+    #GxxComp("S_plus_N_20.wav",0)
+    GxxComp("P_plus_N_10.wav",87)
+
+
+
+def GxxComp(filename,syncStep):
     path = folder+filename
     print path
 
-    #data = wave.open(path,'r')
 
     fs , data = wavfile.read(path)
 
@@ -43,35 +75,23 @@ def function(filename):
     N = 1024
     Nl = 200
 
-    Gxx = np.zeros((Nl,N/2))
+    GxxAvg, freqAvg, delF_Avg, Gxx = ssSpecAvg(data,fs,N,Nl,syncStep)
 
-    for i in range(200):
-        n = i*N
-        Gxx[i] = sigA.ssSpec(data[n:n+N-1],fs)
-
-    freq = sigA.freqVec(N, fs)
 
     plt.figure()
-    for i in range(Nl):
-        plt.plot(freq[:np.shape(Gxx)[1]],Gxx[i,])
+    plt.plot(freqAvg[:len(GxxAvg)],GxxAvg)
+    #plt.plot(freqAvg[:len(GxxAvg)],Gxx[13,])
 
-    #### Gxx Avg
-    GxxAvg = np.mean(Gxx,axis=0)
+    rmsAvg = np.sum(GxxAvg) * delF_Avg
 
-    _, delF_Avg,_ = sigA.param(N,fs,show=True)
-
-    rmsAvg = np.sum(GxxAvg)*delF_Avg
     print "rmsAvg: " + str(rmsAvg)
 
-    plt.figure()
-    plt.plot(freq[:np.shape(Gxx)[1]],GxxAvg)
 
     #### Gxx Long
 
     NTot= Nl*N
 
     GxxTot = np.zeros(NTot)
-    print np.shape(GxxTot)
 
     GxxTot = sigA.ssSpec(data[:NTot],fs)
     freqTot = sigA.freqVec(NTot,fs)
@@ -85,17 +105,10 @@ def function(filename):
     plt.plot(freqTot[:len(GxxTot)],GxxTot)
     plt.show()
 
-    '''
-    print fs
-    t = sigA.timeVec(len(data),fs)
-
-    sd.play(data*0.5,fs,blocking=True)
-
-    plt.figure()
-    plt.plot(t,data)
-    '''
-
     return 0
+
+def timeAvg(filename,syncStep):
+
 
 
 if __name__ == '__main__':
