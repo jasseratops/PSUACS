@@ -64,12 +64,8 @@ def timeAvg(x_time,fs, N, Nl,syncStep=0):
 
 
 def main(args):
-
-    pulseFile = "P_plus_N_10.wav"
-    syncStep = 87
-
-    ### Part A
     partA()
+    partB()
 
 def partA():
     filename = "S_plus_N_20.wav"
@@ -132,10 +128,10 @@ def partA():
 
 
 
-def PartB():
-    filename = "S_plus_N_20.wav"
+def partB():
+    filename = "P_plus_N_10.wav"
     path = folder+filename
-    print path
+    eventPeriod= 1111
 
     fs , data = wavfile.read(path)
 
@@ -149,9 +145,11 @@ def PartB():
     t = sigA.timeVec(Nwav,fs)
 
 
+
     #### 200 runs of Gxx
     N = 1024
     Nl = 200
+    syncStep = eventPeriod - 1024
 
     # Gxx Avg
     GxxAvg, freqAvg, delF_Avg, Gxx = ssSpecAvg(data,fs,N,Nl)
