@@ -107,7 +107,6 @@ def window(type, N):
         win = np.ones(N)
     elif type == "hann":
         win = 1-cos(2*pi*vec)
-        print "from hann"
     elif type == "flat top":
         win = 1-(1.93*cos(2*pi*vec))+(1.29*cos(4*pi*vec))\
               -(0.388*cos(6*pi*vec))+(0.322*cos(8*pi*vec))
