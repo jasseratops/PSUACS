@@ -48,7 +48,7 @@ def check(x_time,fs):
 def linSpec(x_time,fs,winType="uniform"):
     N = len(x_time)
     delT, _, _ = param(N, fs, False)
-    x_time*window(winType,N)
+    x_time = x_time*window(winType,N)
 
     return np.fft.fft(x_time)*delT
 

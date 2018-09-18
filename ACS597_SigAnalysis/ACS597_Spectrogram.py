@@ -6,6 +6,7 @@ import sigA
 
 foldername = "/Users/macbookpro/PycharmProjects/PSUACS/ACS597_SigAnalysis/"
 
+'''
 def ssSpecAvg(x_time, fs, sliceLength, Nslices, sync=0,overlap=0,winType="uniform"):
     Gxx = np.zeros((Nslices, sliceLength / 2))
     for i in range(Nslices):
@@ -16,13 +17,41 @@ def ssSpecAvg(x_time, fs, sliceLength, Nslices, sync=0,overlap=0,winType="unifor
     GxxAvg = np.mean(Gxx, axis=0)
     freqAvg = sigA.freqVec(sliceLength, fs)[:int(sliceLength/2)]
     _, delF_Avg, _ = sigA.param(sliceLength, fs, show=False)
+    print np.shape(Gxx)
+    return GxxAvg, freqAvg, delF_Avg, Gxx
+'''
+def spectroArray(x_time, fs, sliceLength, Nslices, sync=0,overlap=0,winType="uniform"):
+    Gxx = np.zeros((1,sliceLength/2))
+    sliceEnd = 0
+    i = 0
+    n = 0
+    while True:
+        n = i * (int(sliceLength*(1-overlap))+sync)
+        sliceEnd = n + sliceLength - 1
+
+        if sliceEnd >= len(x_time)-1:
+            break
+
+        if i == 0:
+            Gxx[0,]= sigA.ssSpec(x_time[n:sliceEnd], fs,winType)
+        else:
+            Gxx = np.concatenate((Gxx,[sigA.ssSpec(x_time[n:sliceEnd], fs,winType)]),axis=0)
+        i += 1
+
+    #### Gxx Avg
+    GxxAvg = np.mean(Gxx, axis=0)
+    freqAvg = sigA.freqVec(sliceLength, fs)[:int(sliceLength/2)]
+    _, delF_Avg, _ = sigA.param(sliceLength, fs, show=False)
+
+    print "Stepping out of Gxx"
+    print np.shape(Gxx)
     return GxxAvg, freqAvg, delF_Avg, Gxx
 
 def main(args):
     testing()
 
 def testing():
-    fs = 2048
+    fs = 2048.0
     T = 6.0
     N=int(fs*T)
     print N
@@ -49,7 +78,7 @@ def testing():
     sync = 0
 
 
-    spectrogram(x_time,fs,sliceLength,sync=sync,overlap=0.5,winType="uniform")
+    spectrogram(x_time,fs,sliceLength,sync=sync,overlap=0.0,winType="hann")
 
     plt.figure()
     plt.plot(times,x_time)
@@ -69,7 +98,7 @@ def spectrogram(x_time,fs,sliceLength,sync = 0,overlap=0,winType="uniform"):
     Nslices = int(N/sliceLength)
     T = Nslices*sliceLength/fs
     
-    _, freqAvg, _, Gxx = ssSpecAvg(x_time,fs,sliceLength,Nslices,sync,overlap=overlap,winType=winType)
+    _, freqAvg, _, Gxx = spectroArray(x_time,fs,sliceLength,Nslices,sync,overlap=overlap,winType=winType)
 
 
     plt.imshow(Gxx.T, aspect="auto", origin="lower", extent=[0, T, 0, fs / 2])
