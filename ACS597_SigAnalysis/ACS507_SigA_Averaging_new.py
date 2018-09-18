@@ -54,7 +54,7 @@ def timeAvg(x_time,fs, N, Nl,sync=0):
 
 
 def main(args):
-    partA()
+    #partA()
     partB()
 
 def partA():
@@ -65,6 +65,11 @@ def partA():
     fs , data = wavfile.read(path)
 
     Nwav = len(data)
+
+    if data.dtype != np.float32:
+        print "Converting from " + str(data.dtype) + " to float32"
+        data = data.astype(np.float32)
+        data = data/32768.0
 
     print fs
     print data
@@ -143,6 +148,12 @@ def partB():
     fs , data = wavfile.read(path)
 
     Nwav = len(data)
+    print data.dtype
+
+    if data.dtype != np.float32:
+        print "Converting from " + str(data.dtype) + " to float32"
+        data = data.astype(np.float32)
+        data = data/32768.0
 
     print fs
     print data
@@ -150,7 +161,6 @@ def partB():
     print 10*"-"
 
     t = sigA.timeVec(Nwav,fs)
-
 
 
     #### 200 runs of Gxx
