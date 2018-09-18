@@ -45,9 +45,10 @@ def check(x_time,fs):
         print "Array size: " + str(length)
         print "Array too small"
 
-def linSpec(x_time,fs):
+def linSpec(x_time,fs,winType="uniform"):
     N = len(x_time)
     delT, _, _ = param(N, fs, False)
+    x_time*window(winType,N)
 
     return np.fft.fft(x_time)*delT
 
@@ -68,7 +69,7 @@ def rms(x_time,show=True):
 
     return rms_x_time, ms_x_time, m_x_time
 
-def PnN_LinSpec(x_time,fs):
+def PnN_LinSpec(x_time,fs,winType):
     N = len(x_time)
     ind = (N/2)+1               # Rounds down if length of x_time is odd
     lsp = linSpec(x_time,fs)
@@ -77,16 +78,16 @@ def PnN_LinSpec(x_time,fs):
 
     return pos_lsp, neg_lsp
 
-def dsSpec(x_time,fs):
+def dsSpec(x_time,fs,winType="uniform"):
     N = len(x_time)
     _, delF, _ = param(N, fs, False)
-    lsp = linSpec(x_time,fs)
+    lsp = linSpec(x_time,fs,winType)
     Sxx = (abs(lsp)**2)*delF
 
     return Sxx
 
-def ssSpec(x_time,fs):
-    Sxx = dsSpec(x_time,fs)
+def ssSpec(x_time,fs,winType="uniform"):
+    Sxx = dsSpec(x_time,fs,winType)
     N = len(Sxx)
 
     Gxx = Sxx[0:(N/2)+1]
@@ -101,13 +102,17 @@ def ssSpec(x_time,fs):
 def window(type, N):
     n = np.asfarray(np.arange(N))
     vec = n/N
+    win = np.ones(N)
     if type == "uniform":
         win = np.ones(N)
     elif type == "hann":
         win = 1-cos(2*pi*vec)
+        print "from hann"
     elif type == "flat top":
         win = 1-(1.93*cos(2*pi*vec))+(1.29*cos(4*pi*vec))\
               -(0.388*cos(6*pi*vec))+(0.322*cos(8*pi*vec))
+
+
 
     return win
 
