@@ -22,21 +22,18 @@ def param(N,fs,show=True):
         print "fs: " + str(fs)
         print "T: " + str(T)
         print 10 * "-"
-
     return delT, delF, T
 
 
 def timeVec(N, fs):
     delT,_,_ = param(N,fs,False)
     t = np.arange(0, N) * delT
-
     return t
 
 
 def freqVec(N, fs):
     _, delF, _ = param(N, fs, False)
     f = np.arange(0, N) * delF
-
     return f
 
 def check(x_time,fs):
@@ -49,7 +46,6 @@ def linSpec(x_time,fs,winType="uniform"):
     N = len(x_time)
     delT, _, _ = param(N, fs, False)
     x_time = x_time*window(winType,N)
-
     return np.fft.fft(x_time)*delT
 
 def timeSer(lsp, fs):
@@ -83,7 +79,6 @@ def dsSpec(x_time,fs,winType="uniform"):
     _, delF, _ = param(N, fs, False)
     lsp = linSpec(x_time,fs,winType)
     Sxx = (abs(lsp)**2)*delF
-
     return Sxx
 
 def ssSpec(x_time,fs,winType="uniform"):
@@ -96,7 +91,6 @@ def ssSpec(x_time,fs,winType="uniform"):
     for i in range(len(Gxx)):
         if (i != 0) or (i==(len(Gxx)-1) and odd):
             Gxx[i] = (Gxx[i])*2
-
     return Gxx
 
 def window(type, N):
@@ -110,9 +104,6 @@ def window(type, N):
     elif type == "flat top":
         win = 1-(1.93*cos(2*pi*vec))+(1.29*cos(4*pi*vec))\
               -(0.388*cos(6*pi*vec))+(0.322*cos(8*pi*vec))
-
-
-
     return win
 
 def play(x_time,fs):
