@@ -37,7 +37,7 @@ def spectroArray(x_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
     return GxxAvg, freqAvg, delF_Avg, Gxx
 
 
-def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0, dB=True, winType="uniform", scale=True):
+def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0,color="jet", dB=True, winType="uniform", scale=True):
     N = len(x_time)
     Nslices = int(N / sliceLength)
     T = Nslices * sliceLength / float(fs)
@@ -49,7 +49,6 @@ def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0, dB=True, winType="un
     Gxx_dB = 10 * np.log10(Gxx / GxxRef)
 
     ext = [0, T, 0, fs / 2]
-    color = "jet"
 
     if dB:
         plt.imshow(Gxx_dB.T, aspect="auto", origin="lower", cmap=color, extent=ext)
@@ -60,12 +59,12 @@ def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0, dB=True, winType="un
 
 
 def main(args):
-    #testing()
-    actual()
-    #recording()
+    sinTest()
+    raceCar()
+    recording()
 
 
-def testing():
+def sinTest():
     fs = 2048.0
     T = 6.0
     N=int(fs*T)
@@ -95,14 +94,14 @@ def testing():
     sliceLength = 256           # Length of single record
     ov = 0                    # Overlap
 
-    spectrogram(x_time,fs,sliceLength,sync=0,dB=False,overlap=ov,winType="uniform",scale=False)
+    spectrogram(x_time,fs,sliceLength,sync=0,dB=False,color="YlOrRd",overlap=ov,winType="uniform",scale=False)
     plt.xlabel("Time [s]")
     plt.ylabel("Frequency [Hz]")
     plt.title("Spectrogram, 128Hz Sine Wave")
     plt.show()
 
 
-def actual():
+def raceCar():
     filename = "T4_C5_3L_dec4a.wav"
     path = foldername+filename
     fs , data = wavfile.read(path)
@@ -125,7 +124,7 @@ def actual():
     print np.shape(data)
 
     ov = 0.75
-    sliceLength = 1024
+    sliceLength = 64
 
     plt.figure()
     spectrogram(data,fs,sliceLength,sync=0,dB=True,overlap=ov,winType="hann")
