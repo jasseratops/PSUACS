@@ -5,10 +5,12 @@ from numpy import sin, pi, shape
 import sigA
 import sounddevice as sd
 
-#foldername = "/Users/macbookpro/PycharmProjects/PSUACS/ACS597_SigAnalysis/"
-foldername = "C:/Users/alshehrj/PycharmProjects/PSUACS/ACS597_SigAnalysis/"
+foldername = "/Users/macbookpro/PycharmProjects/PSUACS/ACS597_SigAnalysis/"
+#foldername = "C:/Users/alshehrj/PycharmProjects/PSUACS/ACS597_SigAnalysis/"
 
 def spectroArray(x_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
+    if overlap >= 1.0:
+        sys.exit("overlap >= 1")
     Gxx = np.zeros((1,sliceLength/2))
 
     i = 0
@@ -34,10 +36,12 @@ def spectroArray(x_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
     print np.shape(Gxx)
     return GxxAvg, freqAvg, delF_Avg, Gxx
 
+
 def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0, dB=True, winType="uniform", scale=True):
     N = len(x_time)
     Nslices = int(N / sliceLength)
-    T = Nslices * sliceLength / fs
+    T = Nslices * sliceLength / float(fs)
+    print "T: " + str(T)
 
     _, freqAvg, _, Gxx = spectroArray(x_time=x_time, fs=fs, sliceLength=sliceLength, sync=sync, overlap=overlap, winType=winType)
 
@@ -46,6 +50,7 @@ def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0, dB=True, winType="un
 
     ext = [0, T, 0, fs / 2]
     color = "jet"
+
     if dB:
         plt.imshow(Gxx_dB.T, aspect="auto", origin="lower", cmap=color, extent=ext)
     else:
@@ -53,10 +58,12 @@ def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0, dB=True, winType="un
     if scale:
         plt.ylim(ext[1] + 1, ext[3] * 0.8)
 
+
 def main(args):
     #testing()
     actual()
     #recording()
+
 
 def testing():
     fs = 2048.0
@@ -70,6 +77,7 @@ def testing():
     f = 128
 
     x_time = np.zeros(N)
+    t = sigA.timeVec(N,fs)
 
     for i in range(N):
         if i*delT < 2.0:
@@ -79,15 +87,18 @@ def testing():
         else:
             x_time[i] += 0
 
+    plt.figure()
+    plt.plot(t,x_time)
 
-
+    plt.figure()
 
     sliceLength = 256           # Length of single record
-    ov = 0.0                    # Overlap
+    ov = 0                    # Overlap
 
-    spectrogram(x_time,fs,sliceLength,sync=0,dB=True,overlap=ov,winType="uniform")
+    spectrogram(x_time,fs,sliceLength,sync=0,dB=False,overlap=ov,winType="uniform",scale=False)
     plt.xlabel("Time [s]")
     plt.ylabel("Frequency [Hz]")
+    plt.title("Spectrogram, 128Hz Sine Wave")
     plt.show()
 
 
@@ -111,6 +122,7 @@ def actual():
     print 10 * "-"
 
     #t = sigA.timeVec(Nwav, fs)
+    print np.shape(data)
 
     ov = 0.75
     sliceLength = 1024
@@ -119,21 +131,45 @@ def actual():
     spectrogram(data,fs,sliceLength,sync=0,dB=True,overlap=ov,winType="hann")
     plt.xlabel("Time [s]")
     plt.ylabel("Frequency [Hz]")
+    plt.title("Racecar Doppler Shift")
     plt.show()
 
 
 def recording():
-    fs = 48000
-    T = 10
+    fs = 44100
+    T = 5
     N = fs*T
 
-    x_time = sd.rec(frames=N,samplerate=fs,channels=1,blocking=True)
+    print N
 
-    ov = 0.75
-    sliceLength = 1024
+    recArray = sd.rec(frames=N,samplerate=fs,channels=1,blocking=True)
+
+    x_time = np.reshape(recArray, (len(recArray),))
+
+    t = sigA.timeVec(N,fs)
 
     plt.figure()
-    spectrogram(x_time, fs, sliceLength, sync=0, dB=True, overlap=ov, winType="hann")
+    plt.plot(t,x_time)
+
+    ov = 0.75
+    sliceLength = 2056
+
+    GxxAvg = sigA.ssSpec(x_time=x_time,fs=fs)
+    FreqAvg = sigA.freqVec(N,fs)
+
+    plt.figure()
+    plt.plot(FreqAvg[:len(GxxAvg)],GxxAvg)
+
+    scaled = np.int16(x_time/np.max(np.abs(x_time)) * 32767)
+    wavfile.write('test.wav', 44100, scaled)
+
+    print np.shape(x_time)
+
+    plt.figure()
+    spectrogram(x_time=x_time, fs=fs, sliceLength=sliceLength, sync=0, dB=True, overlap=ov, winType="hann",scale=True)
+    #spectroArray(x_time, fs, sliceLength, sync=0, overlap=ov, winType="hann")
+
+    plt.title("Electric Guitar, Cmajor Chord + tremolo")
     plt.xlabel("Time [s]")
     plt.ylabel("Frequency [Hz]")
     plt.show()
@@ -142,4 +178,3 @@ def recording():
 if __name__ == '__main__':
     import sys
     sys.exit(main(sys.argv))
-
