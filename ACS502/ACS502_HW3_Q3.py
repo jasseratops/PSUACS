@@ -32,6 +32,10 @@ def main(args):
 
     print d
 
+    R = d*tan(ang5)
+
+    print R
+
     return 0
 
 
