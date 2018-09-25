@@ -40,6 +40,7 @@ def pMatGen(theta_i,Yacs1,Yacs2,Yacs3,k1l,k2l,k3l):
         invM = np.linalg.inv(M)
 
         P[i] = np.matmul(invM,c)
+        print P
 
 
     print P
@@ -107,7 +108,7 @@ def main(args):
         print k1l
         k2l = k1l * (sin(theta_i) / sin(theta_2))
         k3l = k1l * (sin(theta_i) / sin(theta_tr))
-        R3med = pMatGen(theta_i, Yacs1, Yacs2, Yacs3, i, k2l, k3l)[2,]
+        R3med = pMatGen(theta_i, Yacs1, Yacs2, Yacs3, i, k2l, k3l)
         plt.plot(np.degrees(theta_gr),R3med,label="kl= " +str(i))
 
     plt.legend()
