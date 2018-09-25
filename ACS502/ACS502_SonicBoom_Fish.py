@@ -18,6 +18,7 @@ def main(args):
     pRef_air = 20.E-6
 
 
+
     rho_air=1.21
     rho_water = 1026.0
     c_air = 343.0
@@ -25,6 +26,10 @@ def main(args):
 
     z_air = rho_air*c_air
     z_water = rho_water*c_water
+
+    I = (p_rms**2)/z_air
+    SPL = 20*np.log10(p_rms/pRef_air)
+    IL = SPL-0.16
 
     T = (2*z_water)/(z_water + z_air)
 
@@ -37,12 +42,22 @@ def main(args):
     TL = -10*np.log10(tau)
 
     print "p_rms: " + str(p_rms)
+    print "I: " + str(I)
+    print "SPL: " + str(SPL)
+    print "IL: " + str(IL)
+    print 10*"-"
+
     print "z_air: " + str(z_air)
     print "z_water: " + str(z_water)
+    print 10 * "-"
+
     print "T: " + str(T)
     print "A_tr: " + str(A_tr)
     print "p_tr: " + str(p_tr)
     print "SPL_tr: " + str(SPL_tr)
+
+    print 10 * "-"
+
     print "tau: " + str(tau)
     print "I_tr: " + str(I_tr)
     print "TL: " + str(TL)
