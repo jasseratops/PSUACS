@@ -8,6 +8,7 @@ import sigA
 
 def main(args):
     folder_name = "/Users/macbookpro/PycharmProjects/PSUACS/ACS597_SigAnalysis/Jo Hays/"
+
     file_name = "AACD_208_20_47_38.wav"
     path = folder_name+file_name
     wavFile = wave.open(path)
