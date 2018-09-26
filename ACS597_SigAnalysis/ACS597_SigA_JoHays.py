@@ -24,7 +24,7 @@ def main(args):
     wavFile = wave.open(path)
     noOfSamples = wavFile.getnframes()
     sampleRate =  wavFile.getframerate()
-    noOfBits = wavFile.getsampwidth()*8*noOfSamples
+    noOfBits = wavFile.getsampwidth()*8
 
     cnvrtr = ((2**23)*(1.585E-6)*(1)*(1))/((1)*(1)*(50E-3)*200)
 
