@@ -8,6 +8,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy import pi, sin, cos, tan, exp
+import sys
 
 import sounddevice as sd
 
@@ -92,6 +93,52 @@ def ssSpec(x_time,fs,winType="uniform"):
         if (i != 0) or (i==(len(Gxx)-1) and odd):
             Gxx[i] = (Gxx[i])*2
     return Gxx
+
+def spectroArray(x_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
+    if overlap >= 1.0:
+        sys.exit("overlap >= 1")
+    Gxx = np.zeros((1,sliceLength/2))
+
+    i = 0
+    while True:
+        n = i * (int(sliceLength*(1-overlap))+sync)
+        sliceEnd = n + sliceLength - 1
+
+        if sliceEnd >= len(x_time)-1:
+            break
+
+        if i == 0:
+            Gxx[0,]= ssSpec(x_time[n:sliceEnd], fs,winType)
+        else:
+            Gxx = np.concatenate((Gxx,[ssSpec(x_time[n:sliceEnd], fs,winType)]),axis=0)
+        i += 1
+
+    #### Gxx Avg
+    GxxAvg = np.mean(Gxx, axis=0)
+    freqAvg = freqVec(sliceLength, fs)[:int(sliceLength/2)]
+    _, delF_Avg, _ = param(sliceLength, fs, show=False)
+
+    print np.shape(Gxx)
+    return GxxAvg, freqAvg, delF_Avg, Gxx
+
+def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0,color="jet", dB=True, winType="uniform", scale=True):
+    N = len(x_time)
+    Nslices = int(N / sliceLength)
+    T = Nslices * sliceLength / float(fs)
+
+    _, freqAvg, _, Gxx = spectroArray(x_time=x_time, fs=fs, sliceLength=sliceLength, sync=sync, overlap=overlap, winType=winType)
+
+    GxxRef = 1.0                            # V^2/Hz
+    Gxx_dB = 10 * np.log10(Gxx / GxxRef)
+
+    ext = [0, T, 0, fs / 2]
+
+    if dB:
+        plt.imshow(Gxx_dB.T, aspect="auto", origin="lower", cmap=color, extent=ext)
+    else:
+        plt.imshow(Gxx.T, aspect="auto", origin="lower",cmap=color, extent=ext)
+    if scale:
+        plt.ylim(ext[1] + 1, ext[3] * 0.8)
 
 def window(type, N):
     n = np.asfarray(np.arange(N))
