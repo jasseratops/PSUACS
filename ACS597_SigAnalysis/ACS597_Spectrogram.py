@@ -61,7 +61,7 @@ def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0,color="jet", dB=True,
 def main(args):
     sinTest()
     raceCar()
-    recording()
+    #recording()
 
 
 def sinTest():
@@ -124,7 +124,7 @@ def raceCar():
     print np.shape(data)
 
     ov = 0.75
-    sliceLength = 64
+    sliceLength = 1024
 
     plt.figure()
     spectrogram(data,fs,sliceLength,sync=0,dB=True,overlap=ov,winType="hann")
