@@ -118,7 +118,6 @@ def spectroArray(x_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
     freqAvg = freqVec(sliceLength, fs)[:int(sliceLength/2)]
     _, delF_Avg, _ = param(sliceLength, fs, show=False)
 
-    print np.shape(Gxx)
     return GxxAvg, freqAvg, delF_Avg, Gxx
 
 def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0,color="jet", dB=True, winType="uniform", scale=True):
