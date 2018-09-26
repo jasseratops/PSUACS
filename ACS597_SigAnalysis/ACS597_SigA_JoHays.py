@@ -32,6 +32,7 @@ def main(args):
     nframes = int(10.*60.*sampleRate)
 
 
+
     # wavFileread(path)[chunkStart:chunkEnd]
     data = sf.read(file=path,frames=nframes,start=anStartInd)[0]
     t = np.linspace(0,nframes,nframes)
