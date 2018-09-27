@@ -22,7 +22,7 @@ def main(args):
     noOfBits = wavFile.getsampwidth()*8
 
     cnvrtr = ((2**23)*(1.585E-6)*(1)*(1))/((1)*(1)*(50E-3)*200)
-    print cnvrtr
+    print "Conversion Rate: " + str(cnvrtr)
 
     print "sampleRate: " + str(sampleRate)
     print "noOfBits: " + str(noOfBits)
@@ -35,15 +35,13 @@ def main(args):
     anStartInd = indexGen(startTimeAn_EDT, startTimeRec_UTC, fs=sampleRate)
 
     # wavFileread(path)[chunkStart:chunkEnd]
-    data = (sf.read(file=path,frames=nframes,start=anStartInd)[0])*cnvrtr
-    t = np.linspace(0,nframes/sampleRate,nframes)
-
-    print data
-    print t
-
+    data = sf.read(file=path,frames=nframes,start=anStartInd)[0]
+    #for i in data: print i
     for i in range(5):
         print "data[" +str(i) + "]:" + str(data[i])
 
+    data *= cnvrtr
+    t = np.linspace(0,nframes/sampleRate,nframes)
 
     sliceLength = 10*sampleRate
 
