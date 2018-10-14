@@ -1,8 +1,8 @@
 # PSUACS
-# dBtoPa
+# ACS_HW4_Q8
 # Jasser Alshehri
 # Starkey Hearing Technologies
-# 8/25/2018
+# 10/13/2018
 
 
 import numpy as np
@@ -11,12 +11,18 @@ from numpy import pi, sin, cos, tan, exp
 
 
 def main(args):
-    dB = 177.0
-    ref = 1.0E-6
-    Pa = (10.0**(dB/20.0))*ref
+    rho0 = 1.21
+    c0 = 343.
 
-    print Pa
+    Z0 = rho0*c0
+    SWR = 1.7
 
+    R = - (SWR-1)*(exp(1j*pi/2))/(SWR+1)
+    print np.abs(R)
+    print np.angle(R)
+    Zn = Z0*((1+R)/(1-R))
+
+    print Zn
     return 0
 
 
