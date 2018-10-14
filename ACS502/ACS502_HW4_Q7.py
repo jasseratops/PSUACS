@@ -11,7 +11,7 @@ from numpy import pi, sin, cos, tan, exp
 
 
 def main(args):
-    f = np.linspace(20.,20.E3,1000)
+    f = np.linspace(20.,500,10000)
     omega = 2*pi*f
     c = 343.
     rho0= 1.21
@@ -38,20 +38,26 @@ def main(args):
     TL2 = -10*np.log10(Tw2)
 
 
+
     for i in range(len(f)):
         if TL[i] <= 3.:
             f3dB = f[i]
             break
+    print f3dB
+
 
     T3 = (f/f3dB)/(np.sqrt(1.+((f/f3dB)**2)))
     Tw3 = (np.abs(T3))**2
     TL3 = -10*np.log10(Tw3)
 
     plt.figure()
-    plt.semilogx(f,TL)
-    plt.semilogx(f,TL2)
-    plt.semilogx(f,TL3)
-    plt.axvline(f3dB)
+    plt.title("Transmission Loss vs Frequency")
+    plt.semilogx(f,TL, label ="TL(omega)")
+    plt.semilogx(f,TL3, label="TL(f_3dB)")
+    plt.axvline(f3dB, label="f_3dB")
+    plt.xlabel("Frequency [Hz]")
+    plt.ylabel("Transmission Loss [dB]")
+    plt.legend()
     plt.show()
     return 0
 

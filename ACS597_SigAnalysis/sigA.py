@@ -152,6 +152,12 @@ def window(type, N):
               -(0.388*cos(6*pi*vec))+(0.322*cos(8*pi*vec))
     return win
 
+def crossSpec(x_time,y_time,fs,winType="uniform"):
+    X = linSpec(x_time,fs,winType)
+    Y = linSpec(y_time,fs,winType)
+    Xconj_Y = X.conj * Y
+    G_XY = ssSpec()
+
 def play(x_time,fs):
     normFactor = 0.8/max(x_time)
     sdArray = (x_time*normFactor)

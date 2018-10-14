@@ -11,7 +11,7 @@ from numpy import pi, sin, cos, tan, exp
 
 
 def main(args):
-    Pa = 7.0E6
+    Pa = 3162./(np.sqrt(2))
     ref = 1.0E-6
 
     dB = 20*np.log10(Pa/ref)
