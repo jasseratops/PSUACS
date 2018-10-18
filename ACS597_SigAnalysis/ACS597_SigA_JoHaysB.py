@@ -58,7 +58,7 @@ def main(args):
         f1w = sigA.fWarp(f1, sampleRate)
         f2w = sigA.fWarp(f2, sampleRate)
 
-        Q = f0w/(f2w-f1w)
+        Q=1000.
         b,a = sigA.constQ(f0w,Q,sampleRate)
 
         fltrd = sig.lfilter(b,a,specDat)
@@ -103,7 +103,7 @@ def main(args):
         f1w = sigA.fWarp(f1, sampleRate)
         f2w = sigA.fWarp(f2, sampleRate)
 
-        Q = f0w/(f2w-f1w)
+        Q=1000.
         b,a = sigA.constQ(f0w,Q,sampleRate)
 
         fltrd = sig.lfilter(b,a,specDat)
