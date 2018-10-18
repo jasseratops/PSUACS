@@ -18,8 +18,8 @@ def main(args):
     T = 20.
     N = int(T*fs)
 
-    f1 = f0-(bw/2)
-    f2 = f0+(bw/2)
+    f1 = f0-(bw/2.)
+    f2 = f0+(bw/2.)
     f0_warp = fWarp(f0,fs)
     f1_warp = fWarp(f1,fs)
     f2_warp = fWarp(f2,fs)
@@ -30,7 +30,7 @@ def main(args):
     Q = f0_warp/bw_warp
     print Q
 
-    b, a = constQ(f0,Q,fs,N)
+    b, a = constQ(f0_warp,Q,fs,N)
 
     delT,_,_=sigA.param(N,fs)
 
