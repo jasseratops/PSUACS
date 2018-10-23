@@ -1,9 +1,6 @@
-import scipy.signal as sig
 import sigA
 import numpy as np
-from numpy import pi, cos, sin, exp
 import soundfile as sf
-import sounddevice as sd
 import sys
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -130,7 +127,7 @@ def main(args):
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(x, y, z)
 
-    #plt.show()
+    plt.show()
 
     return 0
 
