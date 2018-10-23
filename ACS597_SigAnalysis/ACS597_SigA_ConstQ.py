@@ -14,20 +14,29 @@ import sigA
 def main(args):
     f0 = 200.
     bw = 0.1
-
-
     fs = 1000.
-    T = 20
+    T = 20.
     N = int(T*fs)
 
-    b, a = constQ(f0,bw,fs,N)
+    f1 = f0-(bw/2.)
+    f2 = f0+(bw/2.)
+    f0_warp = fWarp(f0,fs)
+    f1_warp = fWarp(f1,fs)
+    f2_warp = fWarp(f2,fs)
+    print f0_warp
+    print f1_warp
+    print f2_warp
+    bw_warp = f2_warp-f1_warp
+    Q = f0_warp/bw_warp
+    print Q
+
+    b, a = constQ(f0_warp,Q,fs,N)
 
     delT,_,_=sigA.param(N,fs)
 
     w, h = sig.freqz(b,a)
     f = w*fs/(2*pi)
     m = np.abs(h)
-    m/=max(m)
     p = np.angle(h)
 
     imp_train = np.zeros(N)
@@ -38,8 +47,12 @@ def main(args):
     print b,a
 
     times = sigA.timeVec(N,fs)
-    sineWave = sin(2*np.pi*200*times)
+    sineWave = sin(2*np.pi*f0*times)
     sineResp = sig.lfilter(b,a,sineWave)
+
+    sineWave_sqrd = sineWave**2
+
+    smooth = expAvging(sineWave_sqrd,fs,timeConst=1.)
 
     plt.figure()
     plt.semilogy(f,m)
@@ -50,47 +63,48 @@ def main(args):
     plt.ylabel("Response Magnitude [Pa/Hz]")
     plt.title("Frequency Response of Constant-Q Filter (f0 = 200)")
 
-
     plt.figure()
     plt.plot(times,impResp)
     plt.xlabel("Time [s]")
     plt.ylabel("Amplitude [Pa]")
     plt.title("Impulse Response of Constant-Q Filter (f0 = 200)")
 
-
-
+    '''
     plt.figure()
+
     plt.plot(times,sineResp)
     plt.plot(times,sineWave)
     plt.xlabel("Time [s]")
     plt.ylabel("Amplitude [Pa]")
     plt.title("Sine Response of Constant-Q Filter (f0 = 200)")
-    plt.show()
+    '''
+    plt.figure()
+    plt.plot(times,sineWave)
+    plt.plot(times,sineWave_sqrd)
+    plt.plot(times,smooth)
 
+    plt.show()
     return 0
 
-def expAvging():
-    avg =
-    return avg
+def expAvging(x_time_sqrd,fs,timeConst):
+    delT,_,_ = sigA.param(len(x_time_sqrd),fs,show=False)
+    alpha = delT/timeConst
+    a = [1.,alpha-1]
+    b = [0,alpha]
+    averaged = sig.lfilter(b,a,x_time_sqrd)
 
-def constQ(f0,bw,fs,N):
-    f1 = f0-(bw/2)
-    f2 = f0+(bw/2)
-    delT,delF, _ = sigA.param(N=N,fs=fs,show=False)
+    return averaged
 
-    f0_warp = (np.tan(pi*(f0/fs))/(pi/fs))
-    f1_warp = np.tan(pi * (f1 / fs)) / (pi / fs)
-    f2_warp = np.tan(pi * (f2 / fs)) / (pi / fs)
-    print f0_warp
-    print f1_warp
-    print f2_warp
-    bw_warp = f2_warp-f1_warp
-    Q = f0_warp/bw_warp
-    w0 = 2*pi*f0_warp
+def fWarp(f,fs):
+    f_w = np.tan(pi*f/fs)/(pi/fs)
+    return f_w
 
-    num_s = [w0/Q,0]
-    den_s = [1, w0/Q, w0**2]
+def constQ(f0,Q,fs,N):
+    w0 = 2*pi*f0
+    num_s = np.array([w0/Q,0])
+    den_s = np.array([1., w0/Q, w0**2])
     b,a = bilinearXform(num_s,den_s,fs)
+
     return b,a
 
 def bilinearXform(nums,dens,fs):

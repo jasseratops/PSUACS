@@ -11,6 +11,7 @@ from numpy import pi, sin, cos, tan, exp
 import sys
 
 import sounddevice as sd
+import scipy.signal as sig
 
 def param(N,fs,show=True):
     delT = 1/float(fs)
@@ -162,3 +163,55 @@ def play(x_time,fs):
     normFactor = 0.8/max(x_time)
     sdArray = (x_time*normFactor)
     sd.play(sdArray,fs)
+
+def expAvging(x_time_sqrd, fs, timeConst):
+    delT, _, _ = param(len(x_time_sqrd), fs, show=False)
+    alpha = delT / timeConst
+    a = [1., alpha - 1]
+    b = [0, alpha]
+    averaged = sig.lfilter(b, a, x_time_sqrd)
+
+    return averaged
+
+def fWarp(f,fs):
+    f_w = np.tan(pi*f/fs)/(pi/fs)
+    return f_w
+
+def constQ(f0,Q,fs):
+    w0 = 2*pi*f0
+    num_s = np.array([w0/Q,0])
+    den_s = np.array([1., w0/Q, w0**2])
+    b,a = bilinearXform(num_s,den_s,fs)
+    return b,a
+
+def bilinearXform(nums, dens, fs):
+    nn = len(nums)
+    mm = len(dens)
+
+    if nn > mm:
+        sys.exit("Order of numerator cannot exceed order of denominator")
+    elif nn < mm:
+        # print "padding"
+        padz = np.zeros(mm - nn)
+        nums = np.append(padz, nums)
+
+    rootv = -np.ones(mm - 1)
+    numz = np.zeros(mm)
+    denz = numz
+    fsfact = 1.
+
+    for i in range(mm):
+        basepoly = np.poly(rootv) * fsfact
+        numz = numz + basepoly * nums[mm - i - 1]
+        denz = denz + basepoly * dens[mm - i - 1]
+
+        if i < (mm - 1):
+            fsfact = fsfact * 2 * fs
+            rootv[i] += 2
+    print numz
+    print denz
+
+    numz /= denz[0]
+    denz /= denz[0]
+
+    return numz, denz
