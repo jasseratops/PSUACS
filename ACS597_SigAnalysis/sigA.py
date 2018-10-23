@@ -154,10 +154,18 @@ def window(type, N):
     return win
 
 def crossSpec(x_time,y_time,fs,winType="uniform"):
+    N = len(x_time)
+    if N != len(y_time):
+        sys.exit("x_time and y_time must have the same length")
+    _,delF,_ = param(N,fs,show=False)
+
     X = linSpec(x_time,fs,winType)
     Y = linSpec(y_time,fs,winType)
-    Xconj_Y = X.conj * Y
-    G_XY = ssSpec()
+
+    Xconj_Y = np.conj(X) * Y
+    S_XY = Xconj_Y*delF
+
+    return S_XY
 
 def play(x_time,fs):
     normFactor = 0.8/max(x_time)
