@@ -55,6 +55,7 @@ def main(args):
 
 
     tdVec =[tau_12,tau_13,tau_14,tau_23,tau_24,tau_34]
+    print "tdVec"
     for i in tdVec:
         print i
 
@@ -67,8 +68,33 @@ def main(args):
     XY_rel_3_m = XY_rel_3*0.3048
     print XY_rel_3_m
 
-    distMtx = np.zeros((len(tdVec),3))
-    print distMtx
+    x = XY_rel_3_m[:,0]
+    y = XY_rel_3_m[:,1]
+    z = XY_rel_3_m[:,2]
+
+    X = np.array([[x[1] - x[0], y[1] - y[0], z[1] - z[0]],
+                        [x[2] - x[0], y[2] - y[0], z[2] - z[0]],
+                        [x[3] - x[0], y[3] - y[0], z[3] - z[0]],
+                        [x[2] - x[1], y[2] - y[1], z[2] - z[1]],
+                        [x[3] - x[1], y[3] - y[1], z[3] - z[1]],
+                        [x[3] - x[2], y[3] - y[2], z[3] - z[2]]])
+    print "X: "
+    print X
+
+    S,_,_,_ = np.linalg.lstsq(X,tdVec)
+    #S = np.linalg.lstsq(tdVec,X)
+    print S
+
+    c = np.sqrt(1./((S[0]**2)+(S[1]**2)+(S[2]**2)))
+    print c
+    omega = 1.
+    k = np.array((S[0],S[1],S[2]))*omega
+    print k
+
+    azAng = np.degrees(np.angle(S[1],S[0]))
+    elAng = np.degrees(np.angle(S[2],S[0]))
+    print azAng
+    print elAng
 
     plt.figure()
     plt.plot(times,mic1,label="mic1")
