@@ -54,8 +54,8 @@ def timeAvg(x_time,fs, N, Nl,sync=0):
 
 
 def main(args):
-    #partA()
-    partB()
+    partA()
+    #partB()
 
 def partA():
     filename = "S_plus_N_20.wav"

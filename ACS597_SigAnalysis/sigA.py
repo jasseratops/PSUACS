@@ -103,32 +103,16 @@ def spectroArray(x_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
         sys.exit("overlap >= 1")
 
     N = len(x_time)
-    m = (N-int(overlap*sliceLength))/int(sliceLength*(1-overlap))
-    Gxx = np.zeros((m,sliceLength/2))
+    m = int((N-int(overlap*sliceLength))/(sliceLength*(1-overlap)))
+    Gxx = np.zeros((m,int(sliceLength/2)))
 
     for i in range(m):
         n = i * (int(sliceLength*(1-overlap))+sync)
-        sliceEnd = n + sliceLength - 1
+        sliceEnd = int(n + sliceLength - 1)
+        #print i
+        #print sliceEnd
         Gxx[i,] = ssSpec(x_time[n:sliceEnd], fs,winType)
-    '''
-    if overlap >= 1.0:
-        sys.exit("overlap >= 1")
-    Gxx = np.zeros((1,sliceLength/2))
 
-    i = 0
-    while True:
-        n = i * (int(sliceLength*(1-overlap))+sync)
-        sliceEnd = n + sliceLength - 1
-
-        if sliceEnd >= len(x_time)-1:
-            break
-
-        if i == 0:
-            Gxx[0,]= ssSpec(x_time[n:sliceEnd], fs,winType)
-        else:
-            Gxx = np.concatenate((Gxx,[ssSpec(x_time[n:sliceEnd], fs,winType)]),axis=0)
-        i += 1
-    '''
     #### Gxx Avg
     GxxAvg = np.mean(Gxx, axis=0)
     freqAvg = freqVec(sliceLength, fs)[:int(sliceLength/2)]
