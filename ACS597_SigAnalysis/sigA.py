@@ -96,6 +96,13 @@ def ssSpec(x_time,fs,winType="uniform"):
     return Gxx
 
 def spectroArray(x_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
+    # fix this
+    # number of overlapping windows:
+    # m = (N-int(overlap*sliceLength))/int(sliceLength(1-overlap))
+    # Gxx = np.zeros(m,sliceLength/2)
+    # while True:
+    #    Gxx[i,] = ssSpec
+
     if overlap >= 1.0:
         sys.exit("overlap >= 1")
     Gxx = np.zeros((1,sliceLength/2))
