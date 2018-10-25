@@ -98,11 +98,19 @@ def ssSpec(x_time,fs,winType="uniform"):
 def spectroArray(x_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
     # fix this
     # number of overlapping windows:
-    # m = (N-int(overlap*sliceLength))/int(sliceLength(1-overlap))
-    # Gxx = np.zeros(m,sliceLength/2)
-    # while True:
-    #    Gxx[i,] = ssSpec
+    overlap = np.abs(overlap)
+    if overlap >= 1.0:
+        sys.exit("overlap >= 1")
 
+    N = len(x_time)
+    m = (N-int(overlap*sliceLength))/int(sliceLength*(1-overlap))
+    Gxx = np.zeros((m,sliceLength/2))
+
+    for i in range(m):
+        n = i * (int(sliceLength*(1-overlap))+sync)
+        sliceEnd = n + sliceLength - 1
+        Gxx[i,] = ssSpec(x_time[n:sliceEnd], fs,winType)
+    '''
     if overlap >= 1.0:
         sys.exit("overlap >= 1")
     Gxx = np.zeros((1,sliceLength/2))
@@ -120,7 +128,7 @@ def spectroArray(x_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
         else:
             Gxx = np.concatenate((Gxx,[ssSpec(x_time[n:sliceEnd], fs,winType)]),axis=0)
         i += 1
-
+    '''
     #### Gxx Avg
     GxxAvg = np.mean(Gxx, axis=0)
     freqAvg = freqVec(sliceLength, fs)[:int(sliceLength/2)]

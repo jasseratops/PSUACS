@@ -24,7 +24,9 @@ def part1():
     frst11 = data[0:int(fs*t)]
     scnd11 = data[int(fs*t)]
 
-    msAvgd = sigA.
+    #msAvgd = sigA.
+
+    GxxAVG
 
     plt.figure()
     plt.plot(times,data)

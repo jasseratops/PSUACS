@@ -5,36 +5,8 @@ from numpy import sin, pi, shape
 import sigA
 import sounddevice as sd
 
-foldername = "/Users/macbookpro/PycharmProjects/PSUACS/ACS597_SigAnalysis/"
-#foldername = "C:/Users/alshehrj/PycharmProjects/PSUACS/ACS597_SigAnalysis/"
-
-def spectroArray(x_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
-    if overlap >= 1.0:
-        sys.exit("overlap >= 1")
-    Gxx = np.zeros((1,sliceLength/2))
-
-    i = 0
-    while True:
-        n = i * (int(sliceLength*(1-overlap))+sync)
-        sliceEnd = n + sliceLength - 1
-
-        if sliceEnd >= len(x_time)-1:
-            break
-
-        if i == 0:
-            Gxx[0,]= sigA.ssSpec(x_time[n:sliceEnd], fs,winType)
-        else:
-            Gxx = np.concatenate((Gxx,[sigA.ssSpec(x_time[n:sliceEnd], fs,winType)]),axis=0)
-        i += 1
-
-    #### Gxx Avg
-    GxxAvg = np.mean(Gxx, axis=0)
-    freqAvg = sigA.freqVec(sliceLength, fs)[:int(sliceLength/2)]
-    _, delF_Avg, _ = sigA.param(sliceLength, fs, show=False)
-
-    print "Stepping out of Gxx"
-    print np.shape(Gxx)
-    return GxxAvg, freqAvg, delF_Avg, Gxx
+#foldername = "/Users/macbookpro/PycharmProjects/PSUACS/ACS597_SigAnalysis/"
+foldername = "C:/Users/alshehrj/PycharmProjects/PSUACS/ACS597_SigAnalysis/"
 
 
 def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0,color="jet", dB=True, winType="uniform", scale=True):
@@ -43,7 +15,7 @@ def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0,color="jet", dB=True,
     T = Nslices * sliceLength / float(fs)
     print "T: " + str(T)
 
-    _, freqAvg, _, Gxx = spectroArray(x_time=x_time, fs=fs, sliceLength=sliceLength, sync=sync, overlap=overlap, winType=winType)
+    _, freqAvg, _, Gxx = sigA.spectroArray(x_time=x_time, fs=fs, sliceLength=sliceLength, sync=sync, overlap=overlap, winType=winType)
 
     GxxRef = 1.0                            # V^2/Hz
     Gxx_dB = 10 * np.log10(Gxx / GxxRef)
@@ -92,7 +64,7 @@ def sinTest():
     plt.figure()
 
     sliceLength = 256           # Length of single record
-    ov = 0                    # Overlap
+    ov = 0                      # Overlap
 
     spectrogram(x_time,fs,sliceLength,sync=0,dB=False,color="YlOrRd",overlap=ov,winType="uniform",scale=False)
     plt.xlabel("Time [s]")
