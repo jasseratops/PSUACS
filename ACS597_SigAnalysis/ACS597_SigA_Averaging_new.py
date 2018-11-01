@@ -13,8 +13,8 @@ import wave
 import sounddevice as sd
 import sigA
 
-folder = "C:/Users/alshehrj/PycharmProjects/PSUACS/ACS597_SigAnalysis/"
-#folder = "/Users/macbookpro/PycharmProjects/PSUACS/ACS597_SigAnalysis/HW3/"
+#folder = "C:/Users/alshehrj/PycharmProjects/PSUACS/ACS597_SigAnalysis/"
+folder = "/Users/macbookpro/PycharmProjects/PSUACS/ACS597_SigAnalysis/HW3/"
 
 
 def ssSpecAvg(x_time, fs, N, Nl, sync=0):

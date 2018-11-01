@@ -166,6 +166,68 @@ def crossSpec(x_time,y_time,fs,winType="uniform"):
 
     return S_XY
 
+def ssCrossSpec(x_time,y_time,fs,winType="uniform"):
+    S_XY = crossSpec(x_time,y_time,fs)
+    N = len(S_XY)
+
+    G_XY = S_XY[0:(N / 2) + 1]
+    odd = bool(len(S_XY) % 2)
+
+    for i in range(len(G_XY)):
+        if (i != 0) or (i == (len(G_XY) - 1) and odd):
+            G_XY[i] = (G_XY[i]) * 2
+    return G_XY
+
+def crossSpectroArray(x_time,y_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
+    overlap = np.abs(overlap)
+    if overlap >= 1.0:
+        sys.exit("overlap >= 1")
+
+    N = len(x_time)
+    m = int((N-int(overlap*sliceLength))/(sliceLength*(1-overlap)))
+    G_XY = np.zeros((m,int(sliceLength/2)),dtype=complex)
+
+    for i in range(m):
+        n = i * (int(sliceLength*(1-overlap))+sync)
+        sliceEnd = int(n + sliceLength - 1)
+        #print i
+        #print sliceEnd
+        G_XY[i,] = ssCrossSpec(x_time[n:sliceEnd],y_time[n:sliceEnd], fs,winType)
+
+    #### G_XY Avg
+    G_XYavg = np.mean(G_XY, axis=0)
+    freqAvg = freqVec(sliceLength, fs)[:int(sliceLength/2)]
+    _, delF_Avg, _ = param(sliceLength, fs, show=False)
+
+    return G_XYavg, freqAvg, delF_Avg, G_XY
+
+def crossCorr(x_time,y_time,fs):
+    N = len(x_time)
+    delT,_,_ = param(N,fs,show=False)
+    S_XY = crossSpec(x_time,y_time,fs)
+
+    R_XX = np.fft.ifft(S_XY)/delT
+    sub = 0
+    if N%2:
+        N+=1
+        sub =1
+
+    R_XX = np.concatenate((R_XX[(N/2):],R_XX[0:N/2]))
+    times = timeVec(N,fs)
+    timeShift = np.concatenate((-1*times[1:(N/2)+1-sub][::-1],times[0:(N/2)]))
+
+    return R_XX, timeShift
+
+def coherence(x_time,y_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
+    G_XY,freq,_,_ = crossSpectroArray(x_time,y_time,fs,sliceLength,sync,overlap,winType)
+    G_XX,_,_,_ = spectroArray(x_time,fs,sliceLength,sync,overlap,winType)
+    G_YY,_,_,_ = spectroArray(y_time,fs,sliceLength,sync,overlap,winType)
+
+    gammaSqrd = (np.conjugate(G_XY)*G_XY)/(G_XX*G_YY)
+
+    return gammaSqrd, freq
+
+
 def play(x_time,fs):
     normFactor = 0.8/max(x_time)
     sdArray = (x_time*normFactor)
