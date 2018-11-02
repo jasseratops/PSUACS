@@ -87,13 +87,14 @@ def ssSpec(x_time,fs,winType="uniform"):
     Sxx = dsSpec(x_time,fs,winType)
     N = len(Sxx)
 
-    Gxx = Sxx[0:(N/2)+1]
+    Gxx = Sxx[0:(N/2)+1] * 2
     odd = bool(len(Sxx)%2)
 
     for i in range(len(Gxx)):
-        if (i != 0) or (i==(len(Gxx)-1) and odd):
-            Gxx[i] = (Gxx[i])*2
+        if not((i != 0) or (i==(len(Gxx)-1) and odd)):
+            Gxx[i] = (Gxx[i])*0.5
     return Gxx
+
 
 def spectroArray(x_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
     # fix this
@@ -161,22 +162,22 @@ def crossSpec(x_time,y_time,fs,winType="uniform"):
     X = linSpec(x_time,fs,winType)
     Y = linSpec(y_time,fs,winType)
 
-    Xconj_Y = np.conj(X) * Y
+    Xconj_Y = (np.conj(X) * Y)
     S_XY = Xconj_Y*delF
 
-    return S_XY
+    return S_XY.real
 
 def ssCrossSpec(x_time,y_time,fs,winType="uniform"):
-    S_XY = crossSpec(x_time,y_time,fs)
+    S_XY = crossSpec(x_time,y_time,fs,winType)
     N = len(S_XY)
 
-    G_XY = S_XY[0:(N / 2) + 1]
+    G_XY = S_XY[0:(N / 2) + 1]*2
     odd = bool(len(S_XY) % 2)
 
     for i in range(len(G_XY)):
-        if (i != 0) or (i == (len(G_XY) - 1) and odd):
-            G_XY[i] = (G_XY[i]) * 2
-    return G_XY
+        if not((i != 0) or (i == (len(G_XY) - 1) and odd)):
+            G_XY[i] = (G_XY[i]) * 0.5
+    return abs(G_XY)
 
 def crossSpectroArray(x_time,y_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
     overlap = np.abs(overlap)
@@ -219,11 +220,11 @@ def crossCorr(x_time,y_time,fs):
     return R_XX, timeShift
 
 def coherence(x_time,y_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
-    G_XY,freq,_,_ = crossSpectroArray(x_time,y_time,fs,sliceLength,sync,overlap,winType)
-    G_XX,_,_,_ = spectroArray(x_time,fs,sliceLength,sync,overlap,winType)
-    G_YY,_,_,_ = spectroArray(y_time,fs,sliceLength,sync,overlap,winType)
+    G_XY,freq,_,_ = crossSpectroArray(x_time=x_time,y_time=y_time,fs=fs,sliceLength=sliceLength,sync=sync,overlap=overlap,winType=winType)
+    G_XX,_,_,_ = spectroArray(x_time=x_time,fs=fs,sliceLength=sliceLength,sync=sync,overlap=overlap,winType=winType)
+    G_YY,_,_,_ = spectroArray(x_time=y_time,fs=fs,sliceLength=sliceLength,sync=sync,overlap=overlap,winType=winType)
 
-    gammaSqrd = (np.conjugate(G_XY)*G_XY)/(G_XX*G_YY)
+    gammaSqrd = (np.conj(G_XY)*G_XY)/(G_XX*G_YY)
 
     return gammaSqrd, freq
 
