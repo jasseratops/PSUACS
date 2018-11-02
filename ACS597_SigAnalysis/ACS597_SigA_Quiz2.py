@@ -11,6 +11,7 @@ from numpy import pi, sin, cos, tan, exp
 import soundfile as sf
 import sigA
 import scipy.signal as sig
+import sounddevice as sd
 
 
 def main(args):
@@ -24,8 +25,8 @@ def main(args):
 
     #part1(data_3BB, fs,ov,win,recLength)
     #part2(data_1BB,data_3BB,fs,ov,win,recLength)
-    part3(data_3BB,fs)
-
+    dataFiltered = part3(data_3BB,fs,show=False)
+    part4(dataFiltered,fs)
     return 0
 
 def part1(data,fs,ov,win,recLength):
@@ -123,34 +124,87 @@ def part2(data1,data2,fs,ov,win,recLength):
 
     return 0
 
-def part3(data1,fs):
+def part3(data1,fs,show):
+    N = len(data1)
+    times = sigA.timeVec(N,fs)
+
     Nyq = fs/2.
     f1 = 1.E3
     f2 = 6.E3
     Wn = [f1/Nyq,f2/Nyq]
-    print Wn
 
-    b,a = sig.butter(4,Wn,btype ="bandpass")
+    b,a = sig.butter(10,Wn,btype ="bandpass")
 
     w,h = sig.freqz(b,a)
-    h = abs(h)
-    w *= Nyq/(pi)
-    h = 20*np.log10(h)
-    '''
-    for i in range(len(h)):
-        if h[i]< (max(h)-3):
-            fc = w[i]
-            print fc
-            break
-    '''
+    theta = np.angle(h)
+    mag = 20*np.log10(abs(h))
+    freqs = w*Nyq/(pi)
+
+    ### Sine Test
+    f100 = 100.
+    f2k = 2000.
+    f10k = 1.E4
+
+    sin100 = sin(2*pi*f100*times)
+    sin2k = sin(2*pi*f2k*times)
+    sin10k = sin(2*pi*f10k*times)
+    tot = sin2k+sin100+sin10k
+    totFilt = sig.lfilter(b,a,tot)
+    ###
+
+    data1Filt = sig.lfilter(b,a,data1)
+    if show:
+        plt.figure()
+        plt.subplot(211)
+        plt.semilogx(freqs,mag)
+        plt.subplot(212)
+        plt.semilogx(freqs,theta)
+        plt.axvline(f1)
+        plt.axvline(f2)
+
+        plt.figure()
+        plt.plot(times,tot)
+
+        plt.figure()
+        plt.plot(times,totFilt)
+        plt.plot(times,sin2k)
+        plt.xlim(3.638,3.640)
+
+        plt.figure()
+        plt.plot(times,data1)
+        plt.plot(times,data1Filt)
+        plt.title("N96_2017_3bb, raw vs filtered")
+        plt.show()
+    return data1Filt
+
+def part4(data,fs):
+    N = len(data)
+    times = sigA.timeVec(N,fs)
+    one_eleven = data[1*fs:11*fs]
+
+    recLength = int(0.25*fs)
+    period = int(1.*fs)
+    sync = abs(period-recLength)
+
+    data_avg,timeAvg,_,x_n = sigA.timeAvg(one_eleven,fs,period,Nrecs=10,sync=0)
+
+    for i in range(10):
+        print "data_avg"
+        sd.play(data_avg,fs,blocking=True)
+
+    for i in range(10):
+        print "x_n"
+        sd.play(x_n[i,], fs, blocking=True)
 
     plt.figure()
-    plt.semilogx(w,h)
-    plt.axvline(f1)
-    plt.axvline(f2)
+    plt.plot(times,data)
+    plt.xlim(1,11)
+
+    plt.figure()
+    plt.plot(timeAvg,x_n[2,])
+    plt.plot(timeAvg,data_avg)
     plt.show()
 
-    return 0
 if __name__ == '__main__':
     import sys
 

@@ -95,6 +95,17 @@ def ssSpec(x_time,fs,winType="uniform"):
             Gxx[i] = (Gxx[i])*0.5
     return Gxx
 
+def timeAvg(x_time, fs, recLength, Nrecs, sync=0):
+    x_n = np.zeros((Nrecs, recLength))
+    for i in range(Nrecs):
+        n = i * (recLength + sync)
+        x_n[i] = x_time[n:n + recLength]
+    x_n_Avg = np.mean(x_n, axis=0)
+    times = timeVec(recLength, fs)
+    delT_Avg, _, _ = param(recLength, fs, show=False)
+
+    return x_n_Avg, times, delT_Avg, x_n
+
 
 def spectroArray(x_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
     # fix this
