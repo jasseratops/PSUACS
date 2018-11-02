@@ -180,31 +180,57 @@ def part3(data1,fs,show):
 def part4(data,fs):
     N = len(data)
     times = sigA.timeVec(N,fs)
-    one_eleven = data[1*fs:11*fs]
+    one_twelve = data[1*fs:12*fs]
 
-    recLength = int(0.25*fs)
-    period = int(1.*fs)
-    sync = abs(period-recLength)
+    recLength = int(1.*fs)
+    Nrecs = 10
+    sampleShift = np.zeros(Nrecs)
 
-    data_avg,timeAvg,_,x_n = sigA.timeAvg(one_eleven,fs,period,Nrecs=10,sync=0)
-
-    for i in range(10):
-        print "data_avg"
-        sd.play(data_avg,fs,blocking=True)
-
-    for i in range(10):
-        print "x_n"
-        sd.play(x_n[i,], fs, blocking=True)
+    data_avg,timeAvg,_,x_n = sigA.timeAvg(one_twelve,fs,recLength,Nrecs=Nrecs,sync=0)
+    _, tau = sigA.crossCorr(x_n[0,],x_n[-1,],fs)
 
     plt.figure()
     plt.plot(times,data)
     plt.xlim(1,11)
 
     plt.figure()
-    plt.plot(timeAvg,x_n[2,])
+    plt.plot(timeAvg,x_n[8,])
     plt.plot(timeAvg,data_avg)
-    plt.show()
 
+    for i in range(np.shape(x_n)[0]):
+        R = sigA.crossCorr(x_n[0,], x_n[i,], fs)[0]
+        td = tau[np.argmax(abs(R))]
+        sampleShift[i] = int(td*fs)
+        print "sample shift[" +str(i) + "]: " + str(sampleShift[i])
+    '''
+    plt.figure()
+    plt.plot(tau*fs,abs(R))
+    plt.axvline(td*fs)
+    '''
+    plt.figure()
+    slice = 4
+    plt.title("")
+    plt.plot(timeAvg,one_twelve[0:recLength],label="0")
+    plt.plot(timeAvg,one_twelve[int(slice * recLength):int((slice+1) * recLength)],label="9")
+    plt.plot(timeAvg,one_twelve[int((slice*recLength)-sampleShift[slice]):int(((slice+1)*recLength)-sampleShift[slice])],label="9+timeshift")
+
+    plt.legend()
+    plt.show()
+    '''
+    data_avg_sync,timeAvg_sync,_,x_n_sync = sigA.timeAvg(one_eleven,fs,recLength,Nrecs=Nrecs,sync=sampleShift)
+
+    for i in range(np.shape(x_n_sync)[0]):
+        R = sigA.crossCorr(x_n_sync[0,], x_n_sync[i,], fs)[0]
+        td = tau[np.argmax(abs(R))]
+        sampleShift[i] = int(td*fs)
+        print "sample shift[" +str(i) + "]: " + str(sampleShift[i])
+
+    plt.figure()
+    plt.plot(timeAvg_sync, x_n_sync[8,])
+    plt.plot(timeAvg_sync, data_avg_sync)
+
+    plt.show()
+    '''
 if __name__ == '__main__':
     import sys
 

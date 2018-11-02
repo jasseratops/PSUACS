@@ -96,9 +96,14 @@ def ssSpec(x_time,fs,winType="uniform"):
     return Gxx
 
 def timeAvg(x_time, fs, recLength, Nrecs, sync=0):
+    if np.shape(sync)==():
+        sync = np.zeros(Nrecs)+sync
+    elif len(sync)!=Nrecs:
+        sys.exit("sync must be single int, or same shape as Nrecs")
+
     x_n = np.zeros((Nrecs, recLength))
     for i in range(Nrecs):
-        n = i * (recLength + sync)
+        n = i * (recLength + int(sync[i]))
         x_n[i] = x_time[n:n + recLength]
     x_n_Avg = np.mean(x_n, axis=0)
     times = timeVec(recLength, fs)
