@@ -25,9 +25,9 @@ def main(args):
 
     #part1(data_3BB, fs,ov,win,recLength)
     #part2(data_1BB,data_3BB,fs,ov,win,recLength)
-    #part3(data_3BB, fs, show=True)
-    dataFiltered = part3(data_3BB,fs,show=False)
-    part4(dataFiltered,fs)
+    part3(data_3BB, fs, show=True)
+    #dataFiltered = part3(data_3BB,fs,show=False)
+    #part4(dataFiltered,fs)
     return 0
 
 def part1(data,fs,ov,win,recLength):
@@ -36,8 +36,8 @@ def part1(data,fs,ov,win,recLength):
     frst11 = data[0:N11]
     scnd11 = data[N11:N11*2]
 
-    Gxx_1,freq,delF,Gxx_1_array = sigA.spectroArray(frst11,fs,recLength,sync=0,overlap=ov,winType=win)
-    Gxx_2,_,_,_ = sigA.spectroArray(scnd11,fs,recLength,sync=0,overlap=ov,winType=win)
+    Gxx_1,freq,delF,Gxx_1_array, x_ms = sigA.spectroArray(frst11,fs,recLength,sync=0,overlap=ov,winType=win)
+    Gxx_2 = sigA.spectroArray(scnd11,fs,recLength,sync=0,overlap=ov,winType=win)[0]
 
     m = np.shape(Gxx_1_array)[0]
     print m
@@ -45,6 +45,7 @@ def part1(data,fs,ov,win,recLength):
     sigA.rms(frst11*sigA.window(win,len(frst11)))
     rms_Gxx_Avg = sum(Gxx_1)*delF
     print "rms_Gxx_Avg: " + str(rms_Gxx_Avg)
+    print "x_ms: " + str(np.mean(x_ms))
 
     plt.figure()
     plt.semilogy(freq,Gxx_1,label="0-11s")
@@ -130,8 +131,8 @@ def part3(data1,fs,show):
         plt.title("Butterworth BP [1kHz-6kHz], Phase")
         plt.xlabel("Frequency [Hz]")
         plt.ylabel("Phase [Degrees]")
-        plt.savefig("Part3, Butterworth BP.png")
         plt.subplots_adjust(hspace=0.55)
+        plt.savefig("Part3, Butterworth BP.png")
 
         plt.figure()
         plt.plot(times,tot)
@@ -163,7 +164,6 @@ def part3(data1,fs,show):
         plt.show()
 
     return data1Filt
-
 
 def part4(data,fs):
     N = len(data)

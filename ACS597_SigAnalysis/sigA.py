@@ -123,19 +123,23 @@ def spectroArray(x_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
     m = int((N-int(overlap*sliceLength))/(sliceLength*(1-overlap)))
     Gxx = np.zeros((m,int(sliceLength/2)))
 
+    x_ms = np.zeros(m)
+
+
     for i in range(m):
         n = i * (int(sliceLength*(1-overlap))+sync)
         sliceEnd = int(n + sliceLength - 1)
         #print i
         #print sliceEnd
         Gxx[i,] = ssSpec(x_time[n:sliceEnd], fs,winType)
+        x_ms[i] = rms(x_time[n:sliceEnd]*window(winType,int(sliceLength-1)),show=False)[1]
 
     #### Gxx Avg
     GxxAvg = np.mean(Gxx, axis=0)
     freqAvg = freqVec(sliceLength, fs)[:int(sliceLength/2)]
     _, delF_Avg, _ = param(sliceLength, fs, show=False)
 
-    return GxxAvg, freqAvg, delF_Avg, Gxx
+    return GxxAvg, freqAvg, delF_Avg, Gxx, x_ms
 
 def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0,color="jet", dB=True, winType="uniform", scale=True):
     N = len(x_time)
