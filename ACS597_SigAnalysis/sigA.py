@@ -26,12 +26,10 @@ def param(N,fs,show=True):
         print 10 * "-"
     return delT, delF, T
 
-
 def timeVec(N, fs):
     delT,_,_ = param(N,fs,False)
     t = np.arange(0, N) * delT
     return t
-
 
 def freqVec(N, fs):
     _, delF, _ = param(N, fs, False)
@@ -111,7 +109,6 @@ def timeAvg(x_time, fs, recLength, Nrecs, sync=0):
 
     return x_n_Avg, times, delT_Avg, x_n
 
-
 def spectroArray(x_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
     # fix this
     # number of overlapping windows:
@@ -185,7 +182,7 @@ def crossSpec(x_time,y_time,fs,winType="uniform"):
     Xconj_Y = (np.conj(X) * Y)
     S_XY = Xconj_Y*delF
 
-    return S_XY.real
+    return S_XY
 
 def ssCrossSpec(x_time,y_time,fs,winType="uniform"):
     S_XY = crossSpec(x_time,y_time,fs,winType)
@@ -247,7 +244,6 @@ def coherence(x_time,y_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"
     gammaSqrd = (np.conj(G_XY)*G_XY)/(G_XX*G_YY)
 
     return gammaSqrd, freq
-
 
 def play(x_time,fs):
     normFactor = 0.8/max(x_time)
