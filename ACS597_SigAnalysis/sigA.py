@@ -136,7 +136,7 @@ def spectroArray(x_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
     freqAvg = freqVec(sliceLength, fs)[:int(sliceLength/2)]
     _, delF_Avg, _ = param(sliceLength, fs, show=False)
 
-    return GxxAvg, freqAvg, delF_Avg, Gxx, x_ms
+    return GxxAvg, freqAvg, delF_Avg, Gxx#, x_ms
 
 def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0,color="jet", dB=True, winType="uniform", scale=True):
     N = len(x_time)
@@ -194,7 +194,7 @@ def ssCrossSpec(x_time,y_time,fs,winType="uniform"):
     for i in range(len(G_XY)):
         if not((i != 0) or (i == (len(G_XY) - 1) and odd)):
             G_XY[i] = (G_XY[i]) * 0.5
-    return abs(G_XY)
+    return G_XY
 
 def crossSpectroArray(x_time,y_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
     overlap = np.abs(overlap)
