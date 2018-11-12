@@ -24,8 +24,8 @@ def main(args):
     recLength = recDuration*fs
 
     #part1(data_3BB, fs,ov,win,recLength)
-    #part2(data_1BB,data_3BB,fs,ov,win,recLength)
-    part3(data_3BB, fs, show=True)
+    part2(data_1BB,data_3BB,fs,ov,win,recLength)
+    #part3(data_3BB, fs, show=True)
     #dataFiltered = part3(data_3BB,fs,show=False)
     #part4(dataFiltered,fs)
     return 0
