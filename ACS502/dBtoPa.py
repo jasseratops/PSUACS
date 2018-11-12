@@ -11,11 +11,13 @@ from numpy import pi, sin, cos, tan, exp
 
 
 def main(args):
-    dB = (3162./np.sqrt(2))
-    ref = 1.0E-6
-    Pa = (10.0**(dB/20.0))*ref
-
-    print Pa
+    dB = 117.
+    ref = 20.0E-6
+    p_rms = (10.0**(dB/20.0))*ref
+    rmsFactor = np.sqrt(2.)
+    p_pk = p_rms*rmsFactor
+    print "Prms: " + str(p_rms)
+    print "Ppk:  " + str(p_pk)
 
     return 0
 
