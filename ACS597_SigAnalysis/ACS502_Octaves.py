@@ -128,7 +128,7 @@ def main(args):
     plt.legend()
     plt.savefig("CPA4.png")
 
-    p_ref =20.E-6
+    p_ref = 20.E-6
 
     plt.figure()
     plt.plot(times[::100], 20*np.log10(avg_a/p_ref), label="62.5Hz")
