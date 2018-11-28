@@ -301,3 +301,78 @@ def bilinearXform(nums, dens, fs):
     denz /= denz[0]
 
     return numz, denz
+
+def octFilter(fc,fs):
+    if fc/fs >0.32:
+        sys.exit("Center frequency of third-octave filter too high for fs")
+    if fc/fs <0.0013:
+        sys.exit("Center frequency of third-octave filter too low for fs")
+
+    N=3
+    if fc/fs > 0.15:
+        N=4
+    alpha = 10**(0.15)
+    f1_filt = fc/alpha
+    f2_filt = fc*alpha
+    print N
+    print f1_filt
+    print f2_filt
+    print fs
+    bb,aa = butterworth_BP(N,f1_filt,f2_filt,fs)
+
+    return bb,aa
+
+def butterworth_BP(N,f1_actual,f2_actual,fs):
+    if f2_actual<f1_actual:
+        sys.exit("ensure f1 < f2")
+    if f2_actual> 0.99*fs/2:
+        sys.exit("sample rate too low")
+
+    # warp frequencies to account for bilinear transformation
+    f1 = fs*tan(pi*f1_actual/fs)/pi
+    f2 = fs * tan(pi * f2_actual / fs) / pi
+
+    # calc geometric-mean center frequency
+    fctr = np.sqrt(f1 * f2)
+
+    # Angular location of poles
+    theta = pi / N
+    angs = np.arange((pi + theta) / 2,(3 * pi / 2),theta)
+
+    w0 = 2*pi*fctr
+    w02 = w0**2
+    w_crit = 2*pi*(f2-f1)
+
+    roots = w_crit*exp(1j*angs)
+
+    dena = np.poly(roots).real
+    mplus1 = len(dena)
+    numa = dena[-1]
+
+    nums = np.zeros(mplus1)
+    nums[0] = numa
+
+    dens = np.zeros(2*mplus1-1)
+    tempd = dens
+
+    m1 = mplus1
+    m2 = m1
+    m1 = m1-1
+    ###
+    rootv0 = np.array([-1j*w0,1j*w0])
+    rootv = rootv0
+
+    dens[m1] = dena[mplus1-1]
+    print dens
+    for i in range(mplus1-1):
+        m1 = m1 - 1
+        m2 = m2 + 1
+        basic_coef = np.poly(rootv)
+
+        tempd[m1:m2]=basic_coef
+        dens = dens +dena[m1]*tempd
+        rootv = np.concatenate((rootv,rootv0))
+
+
+    bb,aa = bilinearXform(nums,dens,fs)
+    return bb,aa
