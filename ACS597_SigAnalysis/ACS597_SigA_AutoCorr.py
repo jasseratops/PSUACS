@@ -156,8 +156,8 @@ def main(args):
         CW_train = np.append(CW_train,CW_1500)
 
 
-    sd.play(LFM_train,fs,blocking=True)
-    sd.play(CW_train,fs,blocking=True)
+    #sd.play(LFM_train,fs,blocking=True)
+    #sd.play(CW_train,fs,blocking=True)
 
 
     ### NOISE
@@ -166,7 +166,7 @@ def main(args):
     plt.title("Normal Distribution Noise")
     plt.xlabel("Time [s]")
     plt.ylabel("Pressure [Pa]")
-    plt.savefig("A1.png")
+    #plt.savefig("A1.png")
 
     plt.figure()
     plt.plot(freqs,np.abs(S_XX))
@@ -174,17 +174,14 @@ def main(args):
     plt.title("PSD")
     plt.xlabel("Frequency [Hz]")
     plt.ylabel("Power Spectral Density [Pa^2/Hz]")
-    plt.savefig("A2.png")
-
+    #plt.savefig("A2.png")
 
     plt.figure()
     plt.plot(timeShift,np.abs(R_XX))
     plt.title("Autocorrelation")
     plt.xlabel("Time Shift [s]")
     plt.ylabel("Autocorrelation")
-    plt.savefig("A3.png")
-
-
+    #plt.savefig("A3.png")
 
     ### MLS
     plt.figure()
@@ -192,7 +189,7 @@ def main(args):
     plt.plot(MLS_times,MLS)
     plt.xlabel("Time [s]")
     plt.ylabel("Pressure [Pa]")
-    plt.savefig("B1.png")
+    #plt.savefig("B1.png")
 
 
     plt.figure()
@@ -201,7 +198,7 @@ def main(args):
     plt.xlim(MLS_freqs[0]-50,MLS_freqs[len(MLS_freqs)/2])
     plt.xlabel("Frequency [Hz]")
     plt.ylabel("Power Spectral Density [Pa^2/Hz]")
-    plt.savefig("B2.png")
+    #plt.savefig("B2.png")
 
 
     plt.figure()
@@ -209,7 +206,7 @@ def main(args):
     plt.plot(timeShiftMLS,np.abs(R_XX_MLS))
     plt.xlabel("Time Shift [s]")
     plt.ylabel("Autocorrelation")
-    plt.savefig("B3.png")
+    #plt.savefig("B3.png")
 
     print np.abs(R_XX_MLS[0])
     print np.abs(R_XX_MLS[1])
@@ -222,7 +219,7 @@ def main(args):
     plt.plot(times[0:len(CW_Pulse)],CW_Pulse)
     plt.xlabel("Time [s]")
     plt.ylabel("Pressure [Pa]")
-    plt.savefig("C1.png")
+    #plt.savefig("C1.png")
 
     plt.figure()
     plt.title("CW PSD")
@@ -230,7 +227,7 @@ def main(args):
     plt.xlim(freqs_CW[0]-50,freqs_CW[len(freqs_CW)/2])
     plt.xlabel("Frequency [Hz]")
     plt.ylabel("Power Spectral Density [Pa^2/Hz]")
-    plt.savefig("C2.png")
+    #plt.savefig("C2.png")
 
 
     plt.figure()
@@ -238,14 +235,14 @@ def main(args):
     plt.plot(timeShift_CW,R_XX_CW)
     plt.xlabel("Time Shift [s]")
     plt.ylabel("Autocorrelation")
-    plt.savefig("C3.png")
+    #plt.savefig("C3.png")
 
     plt.figure()
     plt.title("CW Pulse, Tapered")
     plt.plot(times[0:len(CW_Tap)],CW_Tap)
     plt.xlabel("Time [s]")
     plt.ylabel("Pressure [Pa]")
-    plt.savefig("D1.png")
+    #plt.savefig("D1.png")
 
 
     plt.figure()
@@ -254,14 +251,14 @@ def main(args):
     plt.xlim(freqs_CW[0]-50,freqs_CW[len(freqs_CW)/2])
     plt.xlabel("Frequency [Hz]")
     plt.ylabel("Power Spectral Density [Pa^2/Hz]")
-    plt.savefig("D2.png")
+    #plt.savefig("D2.png")
 
     plt.figure()
     plt.title("CW (Tapered) Autocorrelation")
     plt.plot(timeShift_CW,R_XX_CW_Tap)
     plt.xlabel("Time Shift [s]")
     plt.ylabel("Autocorrelation")
-    plt.savefig("D3.png")
+    #plt.savefig("D3.png")
 
 
     plt.figure()
@@ -269,7 +266,7 @@ def main(args):
     plt.plot(times[0:len(CW_Tap)],CW_Short)
     plt.xlabel("Time [s]")
     plt.ylabel("Pressure [Pa]")
-    plt.savefig("E1.png")
+    #plt.savefig("E1.png")
 
 
     plt.figure()
@@ -278,14 +275,14 @@ def main(args):
     plt.xlim(freqs_CW[0]-50,freqs_CW[len(freqs_CW)/2])
     plt.xlabel("Frequency [Hz]")
     plt.ylabel("Power Spectral Density [Pa^2/Hz]")
-    plt.savefig("E2.png")
+    #plt.savefig("E2.png")
 
     plt.figure()
     plt.title("CW (Short) Autocorrelation")
     plt.plot(timeShift_CW,R_XX_CW_Short)
     plt.xlabel("Time Shift [s]")
     plt.ylabel("Autocorrelation")
-    plt.savefig("E3.png")
+    #plt.savefig("E3.png")
 
 
     plt.figure()
@@ -293,7 +290,7 @@ def main(args):
     plt.plot(times[0:int(0.3/delT)],LFM)
     plt.xlabel("Time [s]")
     plt.ylabel("Pressure [Pa]")
-    plt.savefig("F1.png")
+    #plt.savefig("F1.png")
 
 
     plt.figure()
@@ -302,14 +299,14 @@ def main(args):
     plt.xlim(freqs_CW[0]-50,freqs_CW[len(freqs_CW)/2])
     plt.xlabel("Frequency [Hz]")
     plt.ylabel("Power Spectral Density [Pa^2/Hz]")
-    plt.savefig("F2.png")
+    #plt.savefig("F2.png")
 
     plt.figure()
     plt.title("LFM Autocorrelation")
     plt.plot(timeShift_CW,R_XX_LFM)
     plt.xlabel("Time Shift [s]")
     plt.ylabel("Autocorrelation")
-    plt.savefig("F3.png")
+    #plt.savefig("F3.png")
 
 
     plt.figure()
@@ -317,7 +314,7 @@ def main(args):
     plt.plot(times[0:int(0.3/delT)],LFM_low)
     plt.xlabel("Time [s]")
     plt.ylabel("Pressure [Pa]")
-    plt.savefig("G1.png")
+    #plt.savefig("G1.png")
 
 
     plt.figure()
@@ -326,14 +323,14 @@ def main(args):
     plt.xlim(freqs_CW[0]-50,freqs_CW[len(freqs_CW)/2])
     plt.xlabel("Frequency [Hz]")
     plt.ylabel("Power Spectral Density [Pa^2/Hz]")
-    plt.savefig("G2.png")
+    #plt.savefig("G2.png")
 
     plt.figure()
     plt.title("LFM (low) Autocorrelation")
     plt.plot(timeShift_CW,R_XX_LFM_low)
     plt.xlabel("Time Shift [s]")
     plt.ylabel("Autocorrelation")
-    plt.savefig("G3.png")
+    #plt.savefig("G3.png")
 
     plt.show()
 
