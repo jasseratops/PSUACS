@@ -157,6 +157,20 @@ def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0,color="jet", dB=True,
     if scale:
         plt.ylim(ext[1] + 1, ext[3] * 0.8)
 
+def CrossCorrSpectrogram(x_time,y_time,fs,sliceLength,sync=0,overlap=0,color="jet"):
+    N = len(x_time)
+    Nslices = int(N / sliceLength)
+    T = Nslices * sliceLength / float(fs)
+
+    _, timeShift, R_XY = crossCorrArray(x_time,y_time,fs,sliceLength,sync,overlap)
+
+    R_XY_norm = R_XY/max(R_XY)
+
+    ext = [0, T, timeShift[0], timeShift[-1]]
+
+    plt.imshow(R_XY_norm.T, aspect="auto", origin="lower", cmap=color, extent=ext)
+
+
 def window(type, N):
     n = np.asfarray(np.arange(N))
     vec = n/N
@@ -199,7 +213,7 @@ def ssCrossSpec(x_time,y_time,fs,winType="uniform"):
 def crossSpectroArray(x_time,y_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
     overlap = np.abs(overlap)
     if overlap >= 1.0:
-        sys.exit("overlap >= 1")
+        sys.exit("overlap >= 100%")
 
     N = len(x_time)
     m = int((N-int(overlap*sliceLength))/(sliceLength*(1-overlap)))
@@ -224,17 +238,38 @@ def crossCorr(x_time,y_time,fs):
     delT,_,_ = param(N,fs,show=False)
     S_XY = crossSpec(x_time,y_time,fs)
 
-    R_XX = np.fft.ifft(S_XY)/delT
+    R_XY = np.fft.ifft(S_XY)/delT
     sub = 0
     if N%2:
         N+=1
         sub =1
 
-    R_XX = np.concatenate((R_XX[(N/2):],R_XX[0:N/2]))
+    R_XY = np.concatenate((R_XY[(N/2):],R_XY[0:N/2]))
     times = timeVec(N,fs)
     timeShift = np.concatenate((-1*times[1:(N/2)+1-sub][::-1],times[0:(N/2)]))
 
-    return R_XX, timeShift
+    return R_XY, timeShift
+
+def crossCorrArray(x_time,y_time, fs, sliceLength, sync=0,overlap=0):
+    overlap = np.abs(overlap)
+    if overlap >= 1.0:
+        sys.exit("overlap >= 1")
+
+    N = len(x_time)
+    m = int((N - int(overlap * sliceLength)) / (sliceLength * (1 - overlap)))
+    R_XY = np.zeros((m, int(sliceLength / 2)), dtype=complex)
+
+    for i in range(m):
+        n = i * (int(sliceLength*(1-overlap))+sync)
+        sliceEnd = int(n + sliceLength - 1)
+        #print i
+        #print sliceEnd
+        R_XY[i,], timeShift = crossCorr(x_time[n:sliceEnd],y_time[n:sliceEnd], fs)
+
+    #### R_XY Avg
+    R_XYavg = np.mean(R_XY, axis=0)
+
+    return R_XYavg, timeShift, R_XY
 
 def coherence(x_time,y_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
     G_XY,freq,_,_ = crossSpectroArray(x_time=x_time,y_time=y_time,fs=fs,sliceLength=sliceLength,sync=sync,overlap=overlap,winType=winType)
