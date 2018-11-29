@@ -65,7 +65,7 @@ def main(args):
     mic1Filt = sig.lfilter(b,a,mic1)
 
 
-
+    ### LECTURE 11
     plt.figure()
     #sigA.crossCorrSpectrogram(mic2,mic1,fs,sliceLength)
     #sigA.crossCorrSpectrogram(mic2pad,mic1pad,fs*2,sliceLength)
