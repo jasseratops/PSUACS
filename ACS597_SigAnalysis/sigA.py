@@ -157,18 +157,30 @@ def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0,color="jet", dB=True,
     if scale:
         plt.ylim(ext[1] + 1, ext[3] * 0.8)
 
-def CrossCorrSpectrogram(x_time,y_time,fs,sliceLength,sync=0,overlap=0,color="jet"):
+def crossCorrSpectrogram(x_time,y_time,fs,sliceLength,sync=0,overlap=0,color="jet",norm=True):
     N = len(x_time)
     Nslices = int(N / sliceLength)
     T = Nslices * sliceLength / float(fs)
 
     _, timeShift, R_XY = crossCorrArray(x_time,y_time,fs,sliceLength,sync,overlap)
 
-    R_XY_norm = R_XY/max(R_XY)
+    x_RMS = rms(x_time,show=False)[0]
+    y_RMS = rms(y_time,show=False)[0]
+
+    R_XY_norm = abs(R_XY)/(x_RMS*y_RMS)
+
+    R_XY_max = np.amax(R_XY_norm,axis=1)*timeShift[-1]
 
     ext = [0, T, timeShift[0], timeShift[-1]]
+    times = timeVec(Nslices,Nslices/T)
 
-    plt.imshow(R_XY_norm.T, aspect="auto", origin="lower", cmap=color, extent=ext)
+    if norm:
+        print "norm'd"
+        plt.imshow(R_XY_norm.T, aspect="auto", origin="lower", cmap=color, extent=ext)
+    else:
+        plt.imshow(abs(R_XY).T, aspect="auto", origin="lower", cmap=color, extent=ext)
+
+    #plt.plot(times,R_XY_max,color="red")
 
 
 def window(type, N):
@@ -257,7 +269,7 @@ def crossCorrArray(x_time,y_time, fs, sliceLength, sync=0,overlap=0):
 
     N = len(x_time)
     m = int((N - int(overlap * sliceLength)) / (sliceLength * (1 - overlap)))
-    R_XY = np.zeros((m, int(sliceLength / 2)), dtype=complex)
+    R_XY = np.zeros((m,sliceLength-1), dtype=complex)
 
     for i in range(m):
         n = i * (int(sliceLength*(1-overlap))+sync)
