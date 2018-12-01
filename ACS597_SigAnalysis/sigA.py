@@ -157,30 +157,58 @@ def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0,color="jet", dB=True,
     if scale:
         plt.ylim(ext[1] + 1, ext[3] * 0.8)
 
-def crossCorrSpectrogram(x_time,y_time,fs,sliceLength,sync=0,overlap=0,color="jet",norm=True):
+def crossCorrSpectrogram(x_time,y_time,fs,sliceLength,sync=0,overlap=0,color="jet",norm=True,pad=True):
     N = len(x_time)
     Nslices = int(N / sliceLength)
     T = Nslices * sliceLength / float(fs)
 
-    _, timeShift, R_XY = crossCorrArray(x_time,y_time,fs,sliceLength,sync,overlap)
+    _, timeShift, R_XY, C_XY = crossCorrArray(x_time,y_time,fs,sliceLength,pad,sync,overlap)
 
-    x_RMS = rms(x_time,show=False)[0]
-    y_RMS = rms(y_time,show=False)[0]
+    TD = np.zeros(Nslices)
 
-    R_XY_norm = abs(R_XY)/(x_RMS*y_RMS)
-
-    R_XY_max = np.amax(R_XY_norm,axis=1)*timeShift[-1]
-
+    for i in range(Nslices):
+        TD[i] = timeShift[np.argmax(C_XY[i,:])]
     ext = [0, T, timeShift[0], timeShift[-1]]
-    times = timeVec(Nslices,Nslices/T)
 
     if norm:
-        print "norm'd"
-        plt.imshow(R_XY_norm.T, aspect="auto", origin="lower", cmap=color, extent=ext)
+        plt.imshow(np.abs(C_XY).T, aspect="auto", origin="lower", cmap=color, extent=ext)
     else:
         plt.imshow(abs(R_XY).T, aspect="auto", origin="lower", cmap=color, extent=ext)
 
-    #plt.plot(times,R_XY_max,color="red")
+    return TD
+
+def crossCorrArray(x_time,y_time, fs, sliceLength,pad=True, sync=0,overlap=0):
+    overlap = np.abs(overlap)
+    if overlap >= 1.0:
+        sys.exit("overlap >= 1")
+
+    N = len(x_time)
+    m = int((N - int(overlap * sliceLength)) / (sliceLength * (1 - overlap)))
+    if pad:
+        factor = 2
+    else:
+        factor = 1
+    R_XY = np.zeros((m,factor*(sliceLength-1)), dtype=complex)
+    C_XY = np.zeros((m,factor*(sliceLength-1)), dtype=complex)
+
+    for i in range(m):
+        n = i * (int(sliceLength*(1-overlap))+sync)
+        sliceEnd = int(n + sliceLength - 1)
+        x = x_time[n:sliceEnd]
+        y = y_time[n:sliceEnd]
+
+        if pad:
+            x = np.append(x,np.zeros(len(x)))
+            y = np.append(y,np.zeros(len(y)))
+        x_RMS = rms(x,show=False)[0]
+        y_RMS = rms(y,show=False)[0]
+        R_XY[i,], timeShift = crossCorr(x,y, fs)
+        C_XY[i,] = R_XY[i,]/(x_RMS*y_RMS)
+
+    #### R_XY Avg
+    R_XYavg = np.mean(R_XY, axis=0)
+
+    return R_XYavg, timeShift, R_XY, C_XY
 
 
 def window(type, N):
@@ -245,6 +273,22 @@ def crossSpectroArray(x_time,y_time, fs, sliceLength, sync=0,overlap=0,winType="
 
     return G_XYavg, freqAvg, delF_Avg, G_XY
 
+def autocor(x_time,fs):
+    N= len(x_time)
+    delT,_,T= param(N,fs,show=False)
+    S_XX = dsSpec(x_time,fs)
+    R_XX = np.fft.ifft(S_XX)/delT
+    sub = 0
+    if N%2:
+        N+=1
+        sub =1
+
+    R_XX = np.concatenate((R_XX[(N/2):],R_XX[0:N/2]))
+    times = timeVec(N,fs)
+    timeShift = np.concatenate((-1*times[1:(N/2)+1-sub][::-1],times[0:(N/2)]))
+
+    return R_XX, timeShift
+
 def crossCorr(x_time,y_time,fs):
     N = len(x_time)
     delT,_,_ = param(N,fs,show=False)
@@ -262,26 +306,58 @@ def crossCorr(x_time,y_time,fs):
 
     return R_XY, timeShift
 
-def crossCorrArray(x_time,y_time, fs, sliceLength, sync=0,overlap=0):
+def crossCorrSpectrogram(x_time,y_time,fs,sliceLength,sync=0,overlap=0,color="jet",norm=True,pad=True):
+    N = len(x_time)
+    Nslices = int(N / sliceLength)
+    T = Nslices * sliceLength / float(fs)
+
+    _, timeShift, R_XY, C_XY = crossCorrArray(x_time,y_time,fs,sliceLength,pad,sync,overlap)
+
+    TD = np.zeros(Nslices)
+
+    for i in range(Nslices):
+        TD[i] = timeShift[np.argmax(C_XY[i,:])]
+    ext = [0, T, timeShift[0], timeShift[-1]]
+
+    if norm:
+        plt.imshow(np.abs(C_XY).T, aspect="auto", origin="lower", cmap=color, extent=ext)
+    else:
+        plt.imshow(abs(R_XY).T, aspect="auto", origin="lower", cmap=color, extent=ext)
+
+    return TD
+
+def crossCorrArray(x_time,y_time, fs, sliceLength,pad=True, sync=0,overlap=0):
     overlap = np.abs(overlap)
     if overlap >= 1.0:
         sys.exit("overlap >= 1")
 
     N = len(x_time)
     m = int((N - int(overlap * sliceLength)) / (sliceLength * (1 - overlap)))
-    R_XY = np.zeros((m,sliceLength-1), dtype=complex)
+    if pad:
+        factor = 2
+    else:
+        factor = 1
+    R_XY = np.zeros((m,factor*(sliceLength-1)), dtype=complex)
+    C_XY = np.zeros((m,factor*(sliceLength-1)), dtype=complex)
 
     for i in range(m):
         n = i * (int(sliceLength*(1-overlap))+sync)
         sliceEnd = int(n + sliceLength - 1)
-        #print i
-        #print sliceEnd
-        R_XY[i,], timeShift = crossCorr(x_time[n:sliceEnd],y_time[n:sliceEnd], fs)
+        x = x_time[n:sliceEnd]
+        y = y_time[n:sliceEnd]
+
+        if pad:
+            x = np.append(x,np.zeros(len(x)))
+            y = np.append(y,np.zeros(len(y)))
+        x_RMS = rms(x,show=False)[0]
+        y_RMS = rms(y,show=False)[0]
+        R_XY[i,], timeShift = crossCorr(x,y, fs)
+        C_XY[i,] = R_XY[i,]/(x_RMS*y_RMS)
 
     #### R_XY Avg
     R_XYavg = np.mean(R_XY, axis=0)
 
-    return R_XYavg, timeShift, R_XY
+    return R_XYavg, timeShift, R_XY, C_XY
 
 def coherence(x_time,y_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
     G_XY,freq,_,_ = crossSpectroArray(x_time=x_time,y_time=y_time,fs=fs,sliceLength=sliceLength,sync=sync,overlap=overlap,winType=winType)
