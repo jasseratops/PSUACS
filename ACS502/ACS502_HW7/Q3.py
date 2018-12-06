@@ -26,8 +26,9 @@ def main(args):
     f = omega/(2*pi)
     print f
     plt.axhline(0)
-
-
+    plt.title("Q3: R1")
+    plt.xlabel("ka")
+    plt.ylabel("2J_1(ka)/(ka)")
     plt.show()
 
     return 0

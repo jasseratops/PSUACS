@@ -50,6 +50,9 @@ def main(args):
     plt.plot(theta,D)
     for i in zc:
         plt.axvline(theta[i])
+    plt.title("Q5: zero crossings")
+    plt.ylabel("2J_1(ka)/(ka)")
+    plt.xlabel("ka")
 
     plt.show()
 
