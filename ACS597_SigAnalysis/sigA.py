@@ -136,14 +136,14 @@ def spectroArray(x_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
     freqAvg = freqVec(sliceLength, fs)[:int(sliceLength/2)]
     _, delF_Avg, _ = param(sliceLength, fs, show=False)
 
-    return GxxAvg, freqAvg, delF_Avg, Gxx#, x_ms
+    return GxxAvg, freqAvg, delF_Avg, Gxx, x_ms
 
 def spectrogram(x_time, fs, sliceLength, sync=0, overlap=0,color="jet", dB=True, winType="uniform", scale=True):
     N = len(x_time)
     Nslices = int(N / sliceLength)
     T = Nslices * sliceLength / float(fs)
 
-    _, freqAvg, _, Gxx = spectroArray(x_time=x_time, fs=fs, sliceLength=sliceLength, sync=sync, overlap=overlap, winType=winType)
+    _, freqAvg, _, Gxx,_ = spectroArray(x_time=x_time, fs=fs, sliceLength=sliceLength, sync=sync, overlap=overlap, winType=winType)
 
     GxxRef = 1.0                            # V^2/Hz
     Gxx_dB = 10 * np.log10(Gxx / GxxRef)
@@ -210,6 +210,17 @@ def crossCorrArray(x_time,y_time, fs, sliceLength,pad=True, sync=0,overlap=0):
 
     return R_XYavg, timeShift, R_XY, C_XY
 
+def hilbert(x_time,fs):
+    N = len(x_time)
+    LSP = linSpec(x_time,fs)
+
+    W_m = np.ones_like(LSP,dtype=float)
+    W_m[(N/2)+1:] *= 0.
+    W_m[1:N/2] *= 2.
+
+    hil = np.fft.ifft((W_m*LSP))*fs
+
+    return hil
 
 def window(type, N):
     n = np.asfarray(np.arange(N))
@@ -361,8 +372,8 @@ def crossCorrArray(x_time,y_time, fs, sliceLength,pad=True, sync=0,overlap=0):
 
 def coherence(x_time,y_time, fs, sliceLength, sync=0,overlap=0,winType="uniform"):
     G_XY,freq,_,_ = crossSpectroArray(x_time=x_time,y_time=y_time,fs=fs,sliceLength=sliceLength,sync=sync,overlap=overlap,winType=winType)
-    G_XX,_,_,_ = spectroArray(x_time=x_time,fs=fs,sliceLength=sliceLength,sync=sync,overlap=overlap,winType=winType)
-    G_YY,_,_,_ = spectroArray(x_time=y_time,fs=fs,sliceLength=sliceLength,sync=sync,overlap=overlap,winType=winType)
+    G_XX,_,_,_,_ = spectroArray(x_time=x_time,fs=fs,sliceLength=sliceLength,sync=sync,overlap=overlap,winType=winType)
+    G_YY,_,_,_,_ = spectroArray(x_time=y_time,fs=fs,sliceLength=sliceLength,sync=sync,overlap=overlap,winType=winType)
 
     gammaSqrd = (np.conj(G_XY)*G_XY)/(G_XX*G_YY)
 
