@@ -43,7 +43,7 @@ def main(args):
     k_harm = 2*pi*f_harm/c
 
     Dir2 = (2.-cos(k*d*cos(theta)))/2.
-    Dir2_log = 20*np.log10(np.abs(Dir2))
+    Dir2_log = 10*np.log10(np.abs(Dir2))
     print Dir2
 
 
@@ -55,7 +55,8 @@ def main(args):
     #ax.set_rlabel_position(-22.5)  # get radial labels away from plotted line
     ax.grid(True)
 
-    ax.set_title("A line plot on a polar axis", va='bottom')
+    ax.set_title("Q2: 10log10(D(theta))", va='bottom')
+    plt.legend()
     plt.show()
     return 0
 
