@@ -180,8 +180,10 @@ def part3A():
 
     N = len(mic1)
     sliceLength = int(0.2*fs)
-    G_XX, freqAvg,delF,_, x_ms = sigA.spectroArray(mic1,fs,sliceLength,overlap=0.5,winType="hann")
-    G_YY,_,_,_,y_ms = sigA.spectroArray(mic2,fs,sliceLength,overlap=0.5,winType="hann")
+    G_XX, freqAvg,delF,_, x_ms = sigA.spectroArray(mic1,fs,sliceLength,
+                                                   overlap=0.5,winType="hann")
+    G_YY,_,_,_,y_ms = sigA.spectroArray(mic2,fs,sliceLength
+                                        ,overlap=0.5,winType="hann")
     G_XY,_,_,_ = sigA.crossSpectroArray(mic1,mic2,fs,sliceLength,
                                         overlap=0.5,winType="hann")
 
