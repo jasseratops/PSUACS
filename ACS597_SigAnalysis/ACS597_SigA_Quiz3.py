@@ -4,13 +4,12 @@ import sys
 import matplotlib.pyplot as plt
 import sigA
 import scipy.signal as sig
-import sounddevice as sd
 import soundfile as sf
 
 def main(args):
-    #part1()
-    #part2()
-    #part3A()
+    part1()
+    part2()
+    part3A()
     part3B()
     return 0
 
