@@ -12,8 +12,9 @@ from numpy import pi, sin, cos, tan, exp
 
 def main(args):
     AA= 1.
-    omega= 2.*pi*10.
-    tt= 0.3
+    ff = 100.
+    omega= 2.*pi*ff
+    tt= 0.5
     i = -1j
     cc = 343.
     xx = np.linspace(0.,10.,1024)
@@ -25,7 +26,7 @@ def main(args):
 
     plt.figure()
     plt.plot(xx,p1)
-    plt.plot(xx,np.abs(p2))
+    plt.plot(xx,p2)
     plt.show()
     return 0
 

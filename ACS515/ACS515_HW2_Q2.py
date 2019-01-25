@@ -24,9 +24,18 @@ def main(args):
     print c_y
 
     c = np.sqrt((c_x**2)+(c_y**2))
-    thet = np.degrees(np.arctan(c_x/c_y))
-
     print c
+
+    omega = 1.
+
+    k_x = omega/c_x
+    k_y = omega/c_y
+
+    print k_x
+    print k_y
+
+    thet = np.degrees(np.arctan(k_y/k_x))
+
     print thet
 
     return 0
