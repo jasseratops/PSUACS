@@ -7,8 +7,6 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy import pi, sin, cos, tan, exp
-
 
 def main(args):
     N=1024
@@ -27,7 +25,6 @@ def main(args):
             far = kr[i]
             break
 
-
     plt.figure()
     plt.semilogx(kr,np.abs(u_r),label=r"|${u_r}$|")
     plt.semilogx(kr,np.real(u_r),label=r"Re{${u_r}$}")
@@ -45,5 +42,4 @@ def main(args):
 
 if __name__ == '__main__':
     import sys
-
     sys.exit(main(sys.argv))
