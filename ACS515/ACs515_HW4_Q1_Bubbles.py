@@ -32,8 +32,10 @@ def main(args):
     print "ka: " + str(ka)
 
     Rrad = rho*c0*S*((ka**2)/(1+(ka**2)))
+    print "Rrad:" + str(Rrad)
 
     beta = Rrad/(2*m_rad)
+    print beta
 
     tau = 1./beta
 
