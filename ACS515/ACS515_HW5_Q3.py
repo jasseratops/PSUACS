@@ -16,7 +16,7 @@ def main(args):
     c = 343.
 
     f = (beta*c)/(2*pi*d)
-
+    print f
     deg = 0.01
     degRes = deg/360.
     theta = np.pi * np.arange(0,2,degRes)
@@ -28,14 +28,14 @@ def main(args):
         ax.plot(theta, Dir(i, theta)[0], label="kd="+str(i))
         ax.plot(theta, Dir(i, theta)[1])
         plt.legend()
-
-    ax.grid(True)
+        ax.grid(True)
+        plt.savefig("kd"+str(i))
     plt.show()
 
     return 0
 
 def Dir(kd,theta):
-    H = cos(kd*sin(theta))
+    H = cos((kd)*sin(theta))
     H_pos = np.zeros(len(H))
     H_neg = np.zeros(len(H))
 
