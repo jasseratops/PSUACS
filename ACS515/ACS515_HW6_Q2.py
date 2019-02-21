@@ -35,5 +35,4 @@ def quad_dir(theta,R,k):
 
 if __name__ == '__main__':
     import sys
-
     sys.exit(main(sys.argv))
