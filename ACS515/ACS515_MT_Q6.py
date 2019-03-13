@@ -5,26 +5,17 @@ import matplotlib.pyplot as plt
 
 
 def main(args):
-    a = 1.E-3
-    rho = 999.
-    # https://www.engineeringtoolbox.com/water-density-specific-weight-d_595.html
-    p0 = 1.e5
+    a = 0.1E-2
+    rho = 999.06
+    # https://www.engineeringtoolbox.com/water-density-specific-weight-d_595.htmlg
+    p0 = 1e5
     gamma = 1.4
     S=4.*pi*(a**2)
-    c0 = 343.
-    c_f= 1500.
-    V = (4*pi*(a**3))/3.
-    m_rad = rho*S*a
-    s_gas = gamma*p0*(S**2)/V
+    c_f= 1498.
     f = (1./(2.*pi*a))*np.sqrt((3.*gamma*p0)/(rho))
-    f2 = (1/(2*pi))*np.sqrt(s_gas/m_rad)
-
-    T= 1./f
+    u_s = 0.01*a
 
     print f
-    print f2
-    print T
-
 
 
     omega = 2*pi*f
@@ -35,14 +26,9 @@ def main(args):
     Rrad = rho*c_f*S*((ka**2)/(1+(ka**2)))
     print "Rrad:" + str(Rrad)
 
-    beta = Rrad/(2*m_rad)
-    print beta
+    P_rad = 0.5*(u_s**2)*Rrad
+    print "P_rad: " + str(P_rad)
 
-    tau = 1./beta
-
-    print tau
-
-    print tau/T
 
     return 0
 
