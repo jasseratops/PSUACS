@@ -49,7 +49,3 @@ def u_n(x_s,y_s,L_x,L_y):
     return exp(-1*(((x_s/L_x)**2)+((y_s/L_y)**2)))
 
 
-
-if __name__ == '__main__':
-    import sys
-    sys.exit(main(sys.argv))
