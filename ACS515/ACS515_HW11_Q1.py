@@ -26,7 +26,6 @@ def main(args):
     kr = k*r
 
     p_pk = p_ref*10**(SPL/20.)
-    u_0 =
 
     debug('kr')
     debug('ka')
