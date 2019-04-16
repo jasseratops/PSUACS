@@ -11,7 +11,7 @@ from numpy import pi, cos
 from scipy.special import spherical_jn as jn, spherical_yn as yn, lpn
 
 def main(args):
-    deg = 0.01
+    deg = 1.
     degRes = deg / 360.
     theta = pi * np.arange(0, 2, degRes)
 
@@ -58,6 +58,8 @@ def hank(n,z):
     # Calculates the Hankel function
     result = jn(n,z)-1j*yn(n,z)
     return result
+
+
 
 def hankDer(n,z):
     #Caclulates the first derivative of the hankel function with respect to z
