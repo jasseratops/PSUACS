@@ -26,13 +26,7 @@ def main(args):
 def summingRel(n,ka):
     result = 0
     for i in n:
-        it = ((2.*i)+1.)*(jn(i,ka)/hank(i,ka))*((-1)**i)
-        '''
-        for x in range(len(ka)):
-            if isinf(it[x]) or isnan(it[x]):
-                it[x]=0
-        '''
-        result += it
+        result +=((2.*i)+1.)*(jn(i,ka)/hank(i,ka))*((-1)**i)
 
     return result
 

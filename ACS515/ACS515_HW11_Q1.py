@@ -26,9 +26,13 @@ def main(args):
 
     print "ka: " + str(ka)
     print "kr: " + str(kr)
+    print "1/ka: " + str(1/ka)
     print 10*"-"
 
     p_pk = p_ref*10**(SPL/20.)
+
+    print "p_pk: " + str(p_pk)
+    print 10*"-"
     u0_rad_approx = (p_pk/(rho*c))*np.sqrt(r/a)*np.sqrt(2./(pi*ka))
     u0_rad_comp = (p_pk/(rho*c))*np.sqrt(pi/2.)*np.sqrt(kr)*np.sqrt(((ka/2.)**2)+((2./(pi*ka))**2))
     xi0_rad_approx = u0_rad_approx/omega
@@ -39,7 +43,6 @@ def main(args):
     print 10*"-"
     Hder = 0.5*(0.5*(2.-(ka/2)**2)-1j*(1./pi)*((2*(np.log(kr)-0.116))+(2./ka)**2))
     HderMag = np.abs(Hder)
-
 
     u0_trans_approx = (p_pk/(rho*c))*(1./ka)*np.sqrt(r/a)*np.sqrt(2./(pi*ka))
     u0_trans_comp = (p_pk/(rho*c))*np.sqrt(pi*kr/2.)*HderMag
@@ -53,17 +56,9 @@ def main(args):
     print "Displacement"
     print "Radial: " + str(xi0_rad_approx)
     print "Trans.: " + str(xi0_trans_approx)
-
+    print "rat. trans/rad: " + str(xi0_trans_approx/xi0_rad_approx)
 
     return 0
-'''
-def debug(expression):
-    frame = sys._getframe(1)
-    result = (expression, ': ', repr(eval(expression, frame.f_globals, frame.f_locals)))
-    for i in result:
-        print(i,end ="")
-    return 0
-'''
 
 if __name__ == '__main__':
     import sys
