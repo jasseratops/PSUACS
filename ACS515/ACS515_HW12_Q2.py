@@ -1,10 +1,3 @@
-# PSUACS
-# ACS515_HW12_Q2
-# Jasser Alshehri
-# Starkey Hearing Technologies
-# 4/16/2019
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy import pi, sin, cos, tan, exp
@@ -18,13 +11,7 @@ def main(args):
     #ka = np.geomspace(0.01,50.,1024*2)
     ka = [0.2,2.,20.]
     N = 100
-    '''
-    F_bs = (4./(pi*ka))*(np.abs(sumRigCyl(N,ka))**2)
 
-    plt.figure()
-    plt.loglog(ka,F_bs)
-    plt.legend()
-'''
     plt.figure()
     for i in ka:
         holder = np.abs(sumPscatRelCyl(N,i,theta))
@@ -39,6 +26,7 @@ def main(args):
     return 0
 
 def sumPscatRigCyl(N,ka,theta):
+    # rigid cylinder p_scat sum, for code verification
     result = 0
     ep_m=np.ones(N)*2
     ep_m[0]=1
@@ -47,6 +35,7 @@ def sumPscatRigCyl(N,ka,theta):
     return result
 
 def sumPscatRelCyl(N,ka,theta):
+    # pressure release cylinder p_scat sum
     result = 0
     ep_m=np.ones(N)*2
     ep_m[0]=1
@@ -55,6 +44,7 @@ def sumPscatRelCyl(N,ka,theta):
     return result
 
 def sumRigCyl(N,ka):
+    # rigid cylinder back scatter sum, for code verification
     result = 0
     ep_m=np.ones(N)*2
     ep_m[0]=1
@@ -63,6 +53,7 @@ def sumRigCyl(N,ka):
     return result
 
 def Hank(n,z):
+    # normal Hankel function
     result = Jn(n,z)-1j*Yn(n,z)
     return result
 
@@ -71,8 +62,6 @@ def HankDer(n,z):
     result = -1*Hank(n+1,z)+(n/z)*Hank(n,z)
     return result
 
-
 if __name__ == '__main__':
     import sys
-
     sys.exit(main(sys.argv))
