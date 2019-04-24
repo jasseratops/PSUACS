@@ -2,9 +2,11 @@ import numpy as np
 from numpy import sin, cos, tan, pi, exp, log10
 import sys
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
 def main(args):
+
     c = 343.
     L_x = 9.75
     L_y = 7.75
@@ -23,23 +25,47 @@ def main(args):
     B = np.sort(A,axis=None)
 
 
+    modez = []
+    frqz = []
+    clssz = []
+
     counter = 1
     for n_x in range(M):
         for n_y in range(M):
             for n_z in range(M):
                 #print "(" + str(n_x) + "," + str(n_y) + "," + str(n_z) + "): " + str(A[n_x,n_y,n_z])
                 if A[n_x,n_y,n_z] in B[1:26]:
-                    print "-"*20
-                    print str(counter) + ": " + str(A[n_x,n_y,n_z])
-                    print "(" + str(n_x) + "," + str(n_y) + "," + str(n_z) + ")"
+                    mode = "(" + str(n_x) + "," + str(n_y) + "," + str(n_z) + ")"
+                    frq = str(A[n_x,n_y,n_z])
+
                     nonzer = np.count_nonzero([n_x,n_y,n_z])
+                    print nonzer
                     if nonzer == 1:
-                        print "Axial"
+                        clss = "Axial"
                     elif nonzer == 2:
-                        print "Tangential"
+                        clss = "Tangential"
                     else:
-                        print "Oblique"
+                        clss = "Oblique"
+
+
+                    print mode +": " + clss
+                    print frq
+                    print "-"*20
+
+                    modez.append(mode)
+                    frqz.append(frq[:5])
+                    clssz.append(clss)
+
                     counter +=1
+
+    df = pd.DataFrame({'Class.': clssz,
+                       'frequency [Hz]': frqz,
+                       'mode (n_x,n_y,n_z)': modez})
+
+
+    writer = pd.ExcelWriter('ACS515_HW13_1.xlsx')
+    df.to_excel(writer, 'Sheet1', index=False)
+    writer.save()
 
     N_band_250 = modesInBandRect(176.,353.,c,L_x,L_y,L_z)
     N_band_1000= modesInBandRect(707.,1414.,c,L_x,L_y,L_z)
