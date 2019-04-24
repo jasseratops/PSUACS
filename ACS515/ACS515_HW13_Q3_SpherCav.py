@@ -9,7 +9,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy import pi, sin, cos, tan, exp
 
-
 def main(args):
     c_sw = 1500.
     c_air = 343.
@@ -35,5 +34,4 @@ def main(args):
 
 if __name__ == '__main__':
     import sys
-
     sys.exit(main(sys.argv))

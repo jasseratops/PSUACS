@@ -15,8 +15,6 @@ a = 3.
 c = 1481.
 
 def main(args):
-
-
     m = 5
     n = 5
     x = 5
@@ -61,5 +59,4 @@ def nat_frq(alpha,l,):
 
 if __name__ == '__main__':
     import sys
-
     sys.exit(main(sys.argv))
