@@ -20,8 +20,6 @@ def main(args):
     print "Phase Speed: " + str(phaseSpeed(f_21,f))
     print "Group Speed: " + str(groupSpeed(f_21,f))
 
-
-
     return 0
 
 def cutOn(alphaP,radius):
