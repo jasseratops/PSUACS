@@ -28,9 +28,8 @@ def main(args):
     print "L: " + str(L_rect)
 
     ### Cylinder
-    V_cyl = V_rect
     r_cyl = 3.65
-    h_cyl = 3.05
+    h_cyl = L_z
     V_cyl = (pi*r_cyl**2)*(h_cyl)
     S_cyl = (2*pi*r_cyl)*h_cyl + 2.*(pi*r_cyl**2)
     L_cyl = (4*pi*r_cyl)+4*h_cyl
