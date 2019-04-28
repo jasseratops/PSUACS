@@ -1,10 +1,3 @@
-# PSUACS
-# ACS515_HW13_Q2
-# Jasser Alshehri
-# Starkey Hearing Technologies
-# 4/23/2019
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy import pi, sin, cos, tan, exp
