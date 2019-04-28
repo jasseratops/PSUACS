@@ -47,8 +47,6 @@ def main(args):
     print "Number of modes in 250_octave band: " + str(N_band_250)
     print "Number of modes in 1000_octave band: " + str(N_band_1000)
 
-
-
     return 0
 
 def modesInBandRect(f1,f2,c,L_x,L_y,L_z):

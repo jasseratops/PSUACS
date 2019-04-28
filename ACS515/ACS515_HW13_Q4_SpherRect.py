@@ -9,7 +9,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy import pi, sin, cos, tan, exp
 
-
 def main(args):
     z_11 = 2.08
     rigCube = 1./np.cbrt((4.*pi/3.))
