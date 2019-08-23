@@ -1,8 +1,8 @@
 # PSUACS
-# HA_Mic_ka
+# ACS519_HW1
 # Jasser Alshehri
 # Starkey Hearing Technologies
-# 5/8/2019
+# 8/23/2019
 
 
 import numpy as np
@@ -11,14 +11,16 @@ from numpy import pi, sin, cos, tan, exp
 
 
 def main(args):
-    c = 343.
-    frq = np.array([100.,10.E3])
-    k = frq*2*pi/c
-    a = 3.55E-3          # largest dimension of the 5100t
+    k = 1.
+    r = np.linspace(1,50,1024*2)
+    x = exp(1j*k*r)/(4*pi*r)
 
-    ka = k*a
+    plt.figure()
+    plt.plot(r,x.real)
+    plt.plot(r,x.imag)
 
-    print ka
+    plt.xlim(0,r[-1])
+    plt.show()
 
     return 0
 
