@@ -16,10 +16,22 @@ def main(args):
     x = exp(1j*k*r)/(4*pi*r)
 
     plt.figure()
+    plt.subplot(211)
     plt.plot(r,x.real)
-    plt.plot(r,x.imag)
+    plt.xlim(0, r[-1])
+    plt.ylabel("Amplitude [EU]")
+    plt.xlabel("r")
+    plt.title("Green's function: Real")
+    plt.grid()
 
+
+    plt.subplot(212)
+    plt.plot(r,x.imag)
     plt.xlim(0,r[-1])
+    plt.ylabel("Amplitude [EU]")
+    plt.xlabel("r")
+    plt.title("Green's function: Imag")
+    plt.grid()
     plt.show()
 
     return 0
