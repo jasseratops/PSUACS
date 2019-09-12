@@ -13,7 +13,9 @@ from numpy import pi, sin, cos, tan, exp
 def main(args):
     k = 1.
     r = np.linspace(1,50,1024*2)
-    x = exp(1j*k*r)/(4*pi*r)
+    x = Greens(k,r)
+
+    print k/(4*pi)
 
     plt.figure()
     plt.subplot(211)
@@ -36,6 +38,8 @@ def main(args):
 
     return 0
 
+def Greens(k,r):
+    return exp(1j * k * r) / (4 * pi * r)
 
 if __name__ == '__main__':
     import sys
