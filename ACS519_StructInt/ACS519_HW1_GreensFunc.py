@@ -15,6 +15,7 @@ def main(args):
     r = np.linspace(1,50,1024*2)
     x = Greens(k,r)
 
+
     print k/(4*pi)
 
     plt.figure()
