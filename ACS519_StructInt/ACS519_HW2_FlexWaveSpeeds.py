@@ -16,7 +16,7 @@ def main(args):
     runner(h=1.0, E=30.E6, rho=2*7.33E-4, K=(5. / 6.), v=0.3, plotTitle="Double Density")
     runner(h=1.0, E=30.E6, rho=7.33E-4, K=(5. / 6.), v=0.499, plotTitle="Poisson Ratio = 0.499")
 
-    plt.show()
+    plt.show()         # uncomment to display plots
 
 
 def runner(h,E,rho,K,v,plotTitle=""):
@@ -27,12 +27,23 @@ def runner(h,E,rho,K,v,plotTitle=""):
     c_S = shear_speed(E,rho,K,v)
     c_B, c_B_Mindlin, c_B_thin = plate_phase_speed(h,v,E,rho,omega,K)
     k_B = omega/c_B
+    print "-"*10
+    print plotTitle
+    print "Shear Wave Speed: " + str(c_S)
+    for i in range(len(c_B)):
+        if c_B[i] >= c_S*0.85:
+            x = f[i]
+            x_Norm = k_B[i]*h
+            print "c_B=85% of c_S @ f = " +str(x)
+            print "c_B=85% of c_S @ k_B*h = " +str(x_Norm)
+            break
 
     plt.figure(figsize=(10,7))
     plt.subplot(211)
     plt.plot(f,c_B,label = r"${c_B}$")
     plt.plot(f,c_B_Mindlin,label = r"${c_{B_{low}}}$")
     plt.plot(f,c_B_thin,label = r"${c_{B_{high}}}$")
+    plt.axvline(x, color="red")
     plt.grid()
     plt.title(plotTitle)
     plt.xlabel("Frequency [Hz]")
@@ -42,14 +53,16 @@ def runner(h,E,rho,K,v,plotTitle=""):
 
     plt.subplot(212)
     plt.plot(k_B*h,c_B/c_S)
+    plt.axvline(x_Norm, color="red")
     plt.title(plotTitle + ", Normalized")
     plt.xlabel("Normalized Wavenumber")
     plt.ylabel("Normalized Phase Speed")
-    plt.xlim(0,k_B[-1]*h)
+    plt.xlim(0,11)
     plt.grid()
     plt.subplots_adjust(hspace=0.4)
+    plt.ylim(0,1)
 
-    #plt.savefig(plotTitle+".png")
+    #plt.savefig(plotTitle+".png")  # uncomment to save plots
 
     return 0
 
@@ -66,7 +79,7 @@ def plate_phase_speed(h,v,E,rho,omega,K=5./6.):
 
     c_B = np.sqrt((A-B)/C)
     c_B_Mindlin = ((D/(rho*h))*(omega**2))**(1./4.)
-    c_B_thin = np.ones_like(omega)*(K*G/rho)**(1./2.)
+    c_B_thin = np.ones_like(omega)*shear_speed(E,rho,K,v)
     return c_B, c_B_Mindlin, c_B_thin
 
 def shear_speed(E,rho,K,v):
