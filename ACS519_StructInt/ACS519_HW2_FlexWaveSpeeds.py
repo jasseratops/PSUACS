@@ -1,10 +1,3 @@
-# PSUACS
-# ACS519_HW2_FlexWaveSpeeds
-# Jasser Alshehri
-# Starkey Hearing Technologies
-# 9/17/2019
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy import pi, sin, cos, tan, exp
@@ -62,7 +55,7 @@ def runner(h,E,rho,K,v,plotTitle=""):
     plt.subplots_adjust(hspace=0.4)
     plt.ylim(0,1)
 
-    #plt.savefig(plotTitle+".png")  # uncomment to save plots
+    plt.savefig(plotTitle+".png")  # uncomment to save plots
 
     return 0
 
