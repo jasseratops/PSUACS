@@ -8,7 +8,6 @@ def main(args):
     runner(h=1.0, E=2*30.E6, rho=7.33E-4, K=(5. / 6.), v=0.3, plotTitle="Double Young's Modulus")
     runner(h=1.0, E=30.E6, rho=2*7.33E-4, K=(5. / 6.), v=0.3, plotTitle="Double Density")
     runner(h=1.0, E=30.E6, rho=7.33E-4, K=(5. / 6.), v=0.499, plotTitle="Poisson Ratio = 0.499")
-
     plt.show()         # uncomment to display plots
 
 
