@@ -14,13 +14,13 @@ from numpy import pi, sin, cos, tan, exp
 import ACS519_StructInt.soundStructInt as ssint
 
 def main(args):
-    E = 68.9E9      # Pa
-    v = 0.33        #
-    rho = 2.7E3     # kg/m^3
-    eta = 0.004
-    h = 6.35E-3     # m
-    a = 22.5E-2     # m
-    b = 12.4E-2     # m
+    E = 200.E9      # Pa
+    v = 0.303      #
+    rho = 7.75E6    # kg/m^3
+    eta = 0.01
+    h = 0.005       # m
+    a = 1.0         # m
+    b = 4.3         # m
     A_mn = 1.
 
     m_length = 10
@@ -55,28 +55,28 @@ def main(args):
 
 
     # mobility
-    dp = [[5.625E-2,3.1E-2],
-         [11.25E-2,6.2E-2],
-         [8.0E-2,8.0E-2]]
+    dp = [[0.5,0.5]]
 
-    frq = np.linspace(1.,10.E3,1024)
+    frq = np.linspace(1.,10.E2,1024)
     omega = frq*2*pi
     m_mn = ss_modalMass(rho,h,a,b)
 
+
     v_F_inf = inf_plateMob(D_comp,rho,h)*np.ones_like(omega)
+
+
 
     for i in range(len(dp)):
         v_F_tot = np.zeros_like(omega, dtype=complex)
         plt.figure()
         x = dp[i][0]
         y = dp[i][1]
-        for m in range(1,128):
-            for n in range(1,128):
+        for m in range(1,300):
+            for n in range(1,300):
                 A_mn = drivePoint_panelShape(x,x,y,y,m,n,a,b)
                 omega_mn = ss_flatplate_frq(D_comp,rho,h,m,n,a,b)
                 v_F_mn = (-1j*omega/m_mn)*A_mn/((omega_mn**2)-(omega**2))
                 v_F_tot += v_F_mn
-
                 '''
                 plt.subplot(211)
                 plt.semilogy(omega, v_F_mn.real, label="("+str(m)+","+str(n)+")")
@@ -85,27 +85,24 @@ def main(args):
                 '''
         v_F_avg = np.mean(v_F_tot.real)*np.ones_like(v_F_tot.real)
 
-        plt.subplot(311)
-        plt.title(r"Re{v/F}: (" + str(x*100) + "cm," + str(y*100) + "cm)")
+        plt.subplot(211)
+        plt.title("Drive Point: (" + str(x) + "," + str(y) + ")")
         plt.semilogy(omega,v_F_tot.real,label="v_F_tot",color="black")
         plt.semilogy(omega,v_F_inf.real,label="v_F_inf")
+        plt.semilogy(omega,v_F_avg,label="v_F_avg")
         plt.xlim(omega[0],omega[-1])
-
         plt.legend()
-        plt.subplot(312)
-        plt.title(r"Im{v/F}: (" + str(x*100) + "cm," + str(y*100) + "cm)")
+        plt.subplot(212)
         plt.plot(omega, v_F_tot.imag,label="v_F_tot")
         plt.plot(omega, v_F_inf.imag,label="v_F_inf")
-        plt.xlim(omega[0],omega[-1])
+        plt.xlim(omega[0], omega[-1])
         plt.legend()
 
-        plt.subplot(313)
-        plt.title(r"|v/F|: (" + str(x*100) + "cm," + str(y*100) + "cm)")
-        #plt.title("Drive Point: (" + str(x*100) + "cm," + str(y*100) + "cm)")
+        plt.figure()
+        plt.title("Drive Point: (" + str(x) + "," + str(y) + ")")
         plt.semilogy(omega,np.abs(v_F_tot),label="v_F_tot",color="black")
         plt.semilogy(omega,np.abs(v_F_inf),label="v_F_inf")
-        plt.semilogy(omega,np.abs(v_F_avg),label="v_F_avg",linestyle=":")
-        plt.xlim(omega[0],omega[-1])
+        plt.semilogy(omega,np.abs(v_F_avg),label="v_F_avg")
         plt.legend()
 
     plt.show()
@@ -139,7 +136,6 @@ def drivePoint_panelShape(x_r,x_f,y_r,y_f,m,n,a,b):
     k_m = m*pi/a
     k_n = n*pi/b
     A_mn_DP = sin(k_m*x_r)*sin(k_n*y_r)*sin(k_m*x_f)*sin(k_n*y_f)
-
     return A_mn_DP
 
 def ss_modalMass(rho,h,a,b):

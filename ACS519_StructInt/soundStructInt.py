@@ -38,7 +38,7 @@ def structural_shear_mod(E,v):
 def flex_rig(E,h,v,eta = 0.):
     I_prime = plate_mom_inertia_wid(h)
     D = E * (h ** 3) / (12. * (1. - (v ** 2)))
-    D_comp = D*(1 - (1j*eta))
+    D_comp = D*(1 + (-1j*eta))
     return D_comp
 
 def plate_mom_inertia_wid(h):
