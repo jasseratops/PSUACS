@@ -63,27 +63,36 @@ def main(args):
 
     frq = np.linspace(1.,10.E3,1024)
     omega = frq*2*pi
-    v_F = np.zeros(np.shape(omega),dtype=complex)
+    v_F_tot = np.zeros(np.shape(omega),dtype=complex)
     m_mn = ss_modalMass(rho,h,a,b)
 
     for i in range(3):
+        plt.figure()
         x = dp[i][0]
         y = dp[i][1]
         for m in range(1,11):
             for n in range(1,11):
                 A_mn = drivePoint_panelShape(x,x,y,y,m,n,a,b)
                 omega_mn = ss_flatplate_frq(D_comp,rho,h,m,a,n,b)
-                v_F += (-1j*omega/m_mn)*A_mn/((omega_mn**2)-(omega**2))
+                v_F_mn = (-1j*omega/m_mn)*A_mn/((omega_mn**2)-(omega**2))
+                v_F_tot += v_F_mn
+                plt.subplot(211)
+                plt.semilogy(omega, v_F_mn.real, label="("+str(m)+","+str(n)+")")
+                plt.subplot(212)
+                plt.plot(omega, v_F_mn.imag, label="("+str(m)+","+str(n)+")")
+        plt.subplot(211)
+        plt.title("Drive Point: (" + str(x) + "," + str(y) + ")")
 
-    v_F_inf = inf_plateMob(D_comp,rho,h)*np.zeros(np.shape(v_F))
 
-    plt.figure()
+    v_F_inf = inf_plateMob(D_comp,rho,h)*np.ones_like(v_F_tot)
+
     plt.subplot(211)
-    plt.semilogy(omega,v_F.real)
-    plt.semilogy(omega,v_F_inf.real)
+    plt.semilogy(omega,v_F_tot.real,label="v_F_tot")
+    plt.semilogy(omega,v_F_inf.real,label="v_F_inf")
     plt.subplot(212)
-    plt.plot(omega, v_F.imag)
-    plt.plot(omega, v_F_inf.imag)
+    plt.plot(omega, v_F_tot.imag,label="v_F_tot")
+    plt.plot(omega, v_F_inf.imag,label="v_F_inf")
+    plt.legend()
 
     plt.show()
 
