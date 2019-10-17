@@ -67,21 +67,16 @@ def main(args):
 
     v_F_inf = inf_plateMob(D_comp,rho,h)*np.ones_like(omega)
 
+    MN=6
+    '''
     for i in range(len(dp)):
 
         plt.figure()
         x = dp[i][0]
         y = dp[i][1]
 
-        v_F_tot = tot_drivePoint_mobility(x,x,y,y,128,128,a,b,D_comp,rho,h,omega,m_mn)
-        '''
-        v_F_tot = np.zeros_like(omega, dtype=complex)
-        for m in range(1,128):
-            for n in range(1,128):
-                v_F_mn = drivePoint_mobility(x, x, y, y, m, n, a, b, D_comp, rho, h, omega, m_mn)
-                v_F_tot += v_F_mn
+        v_F_tot = tot_drivePoint_mobility(x,x,y,y,R,R,a,b,D_comp,rho,h,omega,m_mn)
 
-        '''
         v_F_avg = np.mean(v_F_tot.real)*np.ones_like(v_F_tot.real)
 
         plt.subplot(311)
@@ -106,38 +101,71 @@ def main(args):
         plt.semilogy(omega,np.abs(v_F_avg),label="v_F_avg",linestyle=":")
         plt.xlim(omega[0],omega[-1])
         plt.legend()
-
+    '''
     ###
     # Surface-Averaged Mobility
     ###
 
-    dx = 0.1E-2
-    dy = dx
-    dAk = dx*dy
-    x_k_array = np.arange(0, a + dx, dx)
-    y_k_array = np.arange(0, b + dy, dy)
+    print "Surface Average Mobility"
 
-    A = a*b
-    N = 200
-
-    for i in range(len(dp)):
+    print "a: " + str(a)
+    print "b: " + str(b)
+    for i in range(len(dp)-2):
         vK_Ff_tot = np.zeros_like(omega, dtype=complex)
         x = dp[i][0]
         y = dp[i][1]
+        plt.figure()
+        plt.title("(" + str(x) + "," + str(y) + ")")
 
-        for K in range(1,N):
-            vK_Ff_tot += tot_drivePoint_mobility(x_k_array[K],x,y_k_array[K],y,128,128,a,b,D_comp,rho,h,omega,m_mn)
+        K_range = range(1,20)
+        mode1_array = np.zeros_like(K_range,dtype=float)
 
-        vK_Ff_savg = np.abs(vK_Ff_tot)*dAk/(a*b)
+        for K in K_range:
+            x_k_array = np.linspace((a/K), a, K)
+            y_k_array = np.linspace((b/K), b, K)
 
 
+            dx = a/K
+            dy = b/K
+            dAk = dx * dy  # Area of single integration increment
+            print "K: " + str(K)
+
+            for x_k in x_k_array:
+                for y_k in y_k_array:
+                    x_r = x_k-(dx/2.)       # obtain value in the MIDDLE of the increment
+                    y_r = y_k-(dx/2.)       # obtain value in the middle of the increment
+                    vK_Ff_tot += tot_drivePoint_mobility(x_r,x,y_r,y,MN,MN,a,b,D_comp,rho,h,omega,m_mn)
+
+            vK_Ff_savg = np.abs(vK_Ff_tot)*dAk/(a*b)
+
+
+            arg_mode1=find_first_max(vK_Ff_savg)
+            arg_mode2=find_first_max(vK_Ff_savg[arg_mode1+1:])
+            print vK_Ff_savg[arg_mode1]
+            mode1_array[K-1] = np.abs(vK_Ff_savg[arg_mode1])
+
+            plt.semilogy(omega,np.abs(vK_Ff_savg),label="K="+str(K))
+            plt.axvline(omega[arg_mode2])
+            plt.xlim(omega[0],omega[-1])
+            plt.legend()
+            print "-"*20
+
+        plt.figure()
+        plt.plot(K_range,mode1_array)
 
 
     plt.show()
 
     return 0
 
+def find_first_max(arr):
+    for i in range(1,len(arr)):
+        if (arr[i] > arr[i-1]) and (arr[i] > arr[i+1]):
+            return i
+            break
+
 def tot_drivePoint_mobility(x_r,x_f,y_r,y_f,m_points,n_points,a,b,D,rho,h,omega,m_mn):
+    #print "tot Drive: " +  str(x_r) +","+ str(x_f)
     v_F_tot = np.zeros_like(omega,dtype=complex)
     for m in range(1,m_points):
         for n in range(1,n_points):
@@ -176,8 +204,12 @@ def ss_flatplate_frq(D_comp,rho,h,m,n,a,b):
 def drivePoint_panelShape(x_r,x_f,y_r,y_f,m,n,a,b):
     k_m = m*pi/a
     k_n = n*pi/b
-    A_mn_DP = sin(k_m*x_r)*sin(k_n*y_r)*sin(k_m*x_f)*sin(k_n*y_f)
+    A = sin(k_m*x_r)
+    B = sin(k_n*y_r)
+    C = sin(k_m*x_f)
+    D = sin(k_n*y_f)
 
+    A_mn_DP = A*B*C*D
     return A_mn_DP
 
 def ss_modalMass(rho,h,a,b):
