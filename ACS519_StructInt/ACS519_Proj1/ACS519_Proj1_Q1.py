@@ -67,7 +67,7 @@ def main(args):
 
     v_F_inf = inf_plateMob(D_comp,rho,h)*np.ones_like(omega)
 
-    MN=6
+    MN=10
     '''
     for i in range(len(dp)):
 
@@ -75,7 +75,7 @@ def main(args):
         x = dp[i][0]
         y = dp[i][1]
 
-        v_F_tot = tot_drivePoint_mobility(x,x,y,y,R,R,a,b,D_comp,rho,h,omega,m_mn)
+        v_F_tot = tot_drivePoint_mobility(x,x,y,y,MN,MN,a,b,D_comp,rho,h,omega,m_mn)
 
         v_F_avg = np.mean(v_F_tot.real)*np.ones_like(v_F_tot.real)
 
@@ -101,6 +101,8 @@ def main(args):
         plt.semilogy(omega,np.abs(v_F_avg),label="v_F_avg",linestyle=":")
         plt.xlim(omega[0],omega[-1])
         plt.legend()
+
+
     '''
     ###
     # Surface-Averaged Mobility
@@ -110,48 +112,60 @@ def main(args):
 
     print "a: " + str(a)
     print "b: " + str(b)
-    for i in range(len(dp)-2):
+    for i in range(len(dp)):
         vK_Ff_tot = np.zeros_like(omega, dtype=complex)
-        x = dp[i][0]
-        y = dp[i][1]
+        x_f = dp[i][0]
+        y_f = dp[i][1]
         plt.figure()
-        plt.title("(" + str(x) + "," + str(y) + ")")
+        plt.title("(" + str(x_f) + "," + str(y_f) + ")")
 
-        K_range = range(1,20)
+        K_range = range(1,10)
         mode1_array = np.zeros_like(K_range,dtype=float)
+        mode2_array = np.zeros_like(K_range,dtype=float)
 
         for K in K_range:
             x_k_array = np.linspace((a/K), a, K)
             y_k_array = np.linspace((b/K), b, K)
-
-
             dx = a/K
             dy = b/K
             dAk = dx * dy  # Area of single integration increment
             print "K: " + str(K)
 
+
             for x_k in x_k_array:
                 for y_k in y_k_array:
-                    x_r = x_k-(dx/2.)       # obtain value in the MIDDLE of the increment
-                    y_r = y_k-(dx/2.)       # obtain value in the middle of the increment
-                    vK_Ff_tot += tot_drivePoint_mobility(x_r,x,y_r,y,MN,MN,a,b,D_comp,rho,h,omega,m_mn)
+                    x_r = x_k -(dx/2.)       # obtain value in the MIDDLE of the increment
+                    y_r = y_k -(dy/2.)       # obtain value in the middle of the increment
+                    vK_Ff_tot += tot_drivePoint_mobility(x_r,x_f,y_r,y_f,MN,MN,a,b,D_comp,rho,h,omega,m_mn)
 
-            vK_Ff_savg = np.abs(vK_Ff_tot)*dAk/(a*b)
+            vK_Ff_savg = np.abs(vK_Ff_tot)*dAk/((a*b))/K
 
 
             arg_mode1=find_first_max(vK_Ff_savg)
-            arg_mode2=find_first_max(vK_Ff_savg[arg_mode1+1:])
-            print vK_Ff_savg[arg_mode1]
+            arg_mode2=1+arg_mode1+find_first_max(vK_Ff_savg[arg_mode1+1:])
             mode1_array[K-1] = np.abs(vK_Ff_savg[arg_mode1])
+            mode2_array[K-1] = np.abs(vK_Ff_savg[arg_mode2])
 
-            plt.semilogy(omega,np.abs(vK_Ff_savg),label="K="+str(K))
+            plt.semilogy(omega,vK_Ff_savg,label="K="+str(K))
             plt.axvline(omega[arg_mode2])
             plt.xlim(omega[0],omega[-1])
             plt.legend()
+            '''
+            print "dAk: " + str(dAk)
+            print "A: " + str(a*b)
+            print "K**2 * dAk: " + str(dAk*K**2)
+            print "dp tot: " + str(np.abs(vK_Ff_tot[arg_mode1]))
+            print "dp savg: " + str(vK_Ff_savg[arg_mode1])
+            '''
             print "-"*20
 
+        plt.axvline(omega[arg_mode1])
+
         plt.figure()
-        plt.plot(K_range,mode1_array)
+        plt.title("(" + str(x_f) + "," + str(y_f) + ")")
+        plt.plot(K_range,mode1_array,label="mode1")
+        plt.plot(K_range,mode2_array,label="mode2")
+        plt.legend()
 
 
     plt.show()
