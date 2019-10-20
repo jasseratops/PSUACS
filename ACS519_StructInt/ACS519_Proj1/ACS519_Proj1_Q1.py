@@ -178,6 +178,20 @@ def find_first_max(arr):
             return i
             break
 
+def ss_thickplate_frq(c_B,omega,m,n,a,b):
+    k_m = (m*pi/a)
+    k_n = (n*pi/b)
+    k_mn = np.sqrt((k_m**2)+(k_n**2))
+    k_B = omega/c_B
+
+    k_B_mn_diff = k_B-k_mn
+    i = np.argmin(k_B_mn_diff)
+
+    print omega[i]
+    print k_B[i]*c_B[i]
+
+    return 0
+
 def tot_drivePoint_mobility(x_r,x_f,y_r,y_f,m_points,n_points,a,b,D,rho,h,omega,m_mn):
     #print "tot Drive: " +  str(x_r) +","+ str(x_f)
     v_F_tot = np.zeros_like(omega,dtype=complex)

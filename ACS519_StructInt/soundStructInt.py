@@ -10,10 +10,10 @@ import matplotlib.pyplot as plt
 from numpy import pi, sin, cos, tan, exp
 
 
-def plate_phase_speed(h,v,E,rho,omega,K):
+def plate_phase_speed(h,v,E,rho,omega,K=5.6,eta = 0.):
     I_prime = plate_mom_inertia_wid(h)
     G = structural_shear_mod(E,v)
-    D = flex_rig(E,h,v)
+    D = flex_rig(E,h,v,eta)
     KhG = K*h*G
     D_KhG = D/KhG
 
