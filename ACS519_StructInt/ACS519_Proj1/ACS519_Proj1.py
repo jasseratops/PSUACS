@@ -25,8 +25,6 @@ rho = 2.7E3  # kg/m^3
 eta = 0.004
 
 
-
-
 frq = np.linspace(1., 10.E3, 1024*2)      # freq vector
 omega = frq * 2 * pi            # angular freq vector
 
@@ -72,7 +70,7 @@ def Q1Q2_Res_Freqs(D_comp,plot=False):
     c_B = ssint.plate_phase_speed(h,v,E,rho,omega,eta=eta)[0]
 
     # Print m's,
-    if plot: print "|m|n|omega_mn|omega_mn_thick"
+    if plot: print "|m|n|k_m|k_n|omega_mn|omega_mn_thick"
     for x in range(len(low10)):
         compare = low10[x]
         for i in range(len(table[:,0])):
@@ -82,9 +80,10 @@ def Q1Q2_Res_Freqs(D_comp,plot=False):
                 n_array[x] = int(table[i,2].real)
                 # calculate thick-plate resonance
                 omega_mn_thick = ss_thickplate_frq(c_B,omega,m_array[x],n_array[x],a,b).real
-
+                k_m = m_array[x]*pi/a
+                k_n = n_array[x]*pi/a
                 if plot:
-                    print "|" + str(m_array[x]) + "|" + str(n_array[x]) + "|" + str(omega_mn_array[x].real) + "|" + str(
+                    print "|" + str(m_array[x]) + "|" + str(n_array[x]) + "|" +str(k_m) + "|" + str(k_n) + "|"+ str(omega_mn_array[x].real) + "|" + str(
                         omega_mn_thick)
                     Mode_Mesh(A_mn, a, b, m_array[x], n_array[x])
 
@@ -100,7 +99,8 @@ def Q3_Drive_Point_Mobility(dp,D_comp):
     v_F_inf = inf_plateMob(D_comp,rho,h)*np.ones_like(omega)    # Calculate mobility for an infinite plate
 
     for i in range(len(dp)):
-        plt.figure()
+        plt.figure(figsize=(12,10))
+
         x = dp[i][0]                # Assign x and y coordinates from drive point list
         y = dp[i][1]
 
@@ -115,7 +115,7 @@ def Q3_Drive_Point_Mobility(dp,D_comp):
         plt.semilogy(omega,v_F_inf.real,label="v_F_inf",color="red")
         plt.xlim(omega[0],omega[-1])
         plt.xlabel("Angular Frequency [rad/s]")
-        plt.ylabel("Mobility Amplitude [s/kg]")
+        plt.ylabel("Mobility [s/kg]")
         plt.legend()
 
         plt.legend()
@@ -125,7 +125,7 @@ def Q3_Drive_Point_Mobility(dp,D_comp):
         #plt.plot(omega, v_F_inf.imag,label="v_F_inf")
         plt.xlim(omega[0],omega[-1])
         plt.xlabel("Angular Frequency [rad/s]")
-        plt.ylabel("Mobility Phase [rad]")
+        plt.ylabel("Mobility [s/kg]")
         plt.legend()
 
         plt.subplot(313)
@@ -133,16 +133,16 @@ def Q3_Drive_Point_Mobility(dp,D_comp):
         #plt.title("Drive Point: (" + str(x*100) + "cm," + str(y*100) + "cm)")
         plt.semilogy(omega,np.abs(v_F_tot),label="v_F_tot",color="black")
         plt.semilogy(omega,np.abs(v_F_inf),label="v_F_inf",color="red")
-        plt.semilogy(omega,np.abs(v_F_avg),label="v_F_avg",linestyle=":",color="green")
+        plt.semilogy(omega,np.abs(v_F_avg),label="v_F_avg",linestyle=":",color="green",linewidth=3.0)
         plt.xlim(omega[0],omega[-1])
         plt.xlabel("Angular Frequency [rad/s]")
         plt.ylabel("Mobility Magnitude [s/kg]")
         plt.legend()
+        plt.subplots_adjust(hspace=0.4)
+        #save fig
+        path = "dp_"+str(x*100)+"cm-"+str(y*100)+"cm.png"
+        #plt.savefig(path)
 
-        ''' save fig
-        path = "dp_"+str(x)+"-"+str(y)+".png"
-        plt.savefig(path)
-        '''
 
     return 0
 
@@ -175,9 +175,10 @@ def Q4_Surface_Averaged_Mobility(dp,D_comp):
         mode2_array = np.zeros_like(k_range,dtype=float)
         mode3_array = np.zeros_like(k_range,dtype=float)
 
-        plt.figure()
+        plt.figure(figsize=(12,7))
+
         plt.subplot(211)
-        plt.title("(" + str(x_f) + "," + str(y_f) + ")")
+        plt.title(r"|v/F|: (" + str(x_f*100) + "cm," + str(y_f*100) + "cm)")
 
         for k in k_range:
             vK_Ff_tot = np.zeros_like(omega, dtype=complex)  # Initialize total drive point mobility array
@@ -201,29 +202,28 @@ def Q4_Surface_Averaged_Mobility(dp,D_comp):
 
             plt.semilogy(omega, vK_Ff_savg, label="k=" + str(k))
             plt.xlim(omega[0], omega[-1])
-            plt.legend()
+            plt.legend(loc=1)
 
-        plt.axvline(omega_peak1)
-        plt.axvline(omega_peak2)
-        plt.axvline(omega_peak3)
+        plt.axvline(omega_peak1,color="black")
+        plt.axvline(omega_peak2,color="black")
+        plt.axvline(omega_peak3,color="black")
         plt.xlabel("Angular Frequency [rad/s]")
         plt.ylabel("Mobility Magnitude (s/kg)")
 
         k_range = np.array(k_range)**2
 
         plt.subplot(212)
-        plt.title("(" + str(x_f) + "," + str(y_f) + ")")
+        plt.title("Mobility Magnitude vs k")
         plt.plot(k_range,mode1_array,label="mode1")
         plt.plot(k_range,mode2_array,label="mode2")
         plt.plot(k_range,mode3_array,label="mode3")
         plt.xlim(k_range[0],k_range[-1])
-        plt.xlabel("k (number of increment segments)")
+        plt.xlabel("k (number of integration points)")
         plt.ylabel("Mobility Magnitude (s/kg)")
-
-        plt.legend()
-
+        plt.legend(loc=1)
+        plt.subplots_adjust(hspace=0.4)
         path = "savg-dp_"+str(x_f)+"-"+str(y_f)+".png"
-        plt.savefig(path)
+        #plt.savefig(path)
 
     return 0
 
