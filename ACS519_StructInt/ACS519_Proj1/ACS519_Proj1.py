@@ -24,11 +24,11 @@ v = 0.33  #
 rho = 2.7E3  # kg/m^3
 eta = 0.004
 
-
+save = False
 frq = np.linspace(1., 10.E3, 1024*2)      # freq vector
 omega = frq * 2 * pi            # angular freq vector
 
-MN = 6       # number of modes for convergence
+MN = 10       # number of modes for convergence
 
 def main(args):
     ### Drive points for Mobility
@@ -39,8 +39,8 @@ def main(args):
     D_comp = ssint.flex_rig(E, h, v, eta)  # Calculate Complex Flexural Rigidity
 
     #Q1Q2_Res_Freqs(D_comp,plot=True)
-    #Q3_Drive_Point_Mobility(dp,D_comp)
-    Q4_Surface_Averaged_Mobility(dp,D_comp)
+    Q3_Drive_Point_Mobility(dp,D_comp)
+    #Q4_Surface_Averaged_Mobility(dp,D_comp)
     #Q5_Variable_Loss_Factor(dp)
     plt.show()
     return 0
@@ -87,16 +87,16 @@ def Q1Q2_Res_Freqs(D_comp,plot=False):
                         omega_mn_thick)
                     Mode_Mesh(A_mn, a, b, m_array[x], n_array[x])
 
-                    ''' Save figures
+                    # Save figures
                     path="mode" + str(m_array[x]) + str(n_array[x]) +".png"
-                    print path
-                    plt.savefig(path)
-                    '''
-    return omega_mn_array
+                    if save: plt.savefig(path)
+
+    return omega_mn_array, m_array, n_array
 
 def Q3_Drive_Point_Mobility(dp,D_comp):
     m_mn = ss_modalMass(rho,h,a,b)              # Calculate modal mass
     v_F_inf = inf_plateMob(D_comp,rho,h)*np.ones_like(omega)    # Calculate mobility for an infinite plate
+    omega_mn_array,m_array,n_array = Q1Q2_Res_Freqs(D_comp)
 
     for i in range(len(dp)):
         plt.figure(figsize=(12,10))
@@ -111,14 +111,21 @@ def Q3_Drive_Point_Mobility(dp,D_comp):
 
         plt.subplot(311)
         plt.title(r"Re{v/F}: (" + str(x*100) + "cm," + str(y*100) + "cm)")
+        for count in range(5):
+            m = m_array[count]
+            n = n_array[count]
+            omega_mn = ss_flatplate_frq(D_comp, rho, h, m, n, a, b)
+            A_mn = drivePoint_panelShape(x, x, y, y, m, n, a, b)
+            v_F_mn = drivePoint_mobility(A_mn,omega_mn,m_mn,omega)
+            plt.semilogy(omega,v_F_mn.real,label="v_F_("+str(m)+","+str(n)+")")
         plt.semilogy(omega,v_F_tot.real,label="v_F_tot",color="black")
         plt.semilogy(omega,v_F_inf.real,label="v_F_inf",color="red")
         plt.xlim(omega[0],omega[-1])
+        plt.ylim(1E-10,)
         plt.xlabel("Angular Frequency [rad/s]")
         plt.ylabel("Mobility [s/kg]")
-        plt.legend()
+        plt.legend(loc='upper right')
 
-        plt.legend()
         plt.subplot(312)
         plt.title(r"Im{v/F}: (" + str(x*100) + "cm," + str(y*100) + "cm)")
         plt.plot(omega, v_F_tot.imag,label="v_F_tot",color="black")
@@ -126,7 +133,7 @@ def Q3_Drive_Point_Mobility(dp,D_comp):
         plt.xlim(omega[0],omega[-1])
         plt.xlabel("Angular Frequency [rad/s]")
         plt.ylabel("Mobility [s/kg]")
-        plt.legend()
+        plt.legend(loc='upper right')
 
         plt.subplot(313)
         plt.title(r"|v/F|: (" + str(x*100) + "cm," + str(y*100) + "cm)")
@@ -137,22 +144,22 @@ def Q3_Drive_Point_Mobility(dp,D_comp):
         plt.xlim(omega[0],omega[-1])
         plt.xlabel("Angular Frequency [rad/s]")
         plt.ylabel("Mobility Magnitude [s/kg]")
-        plt.legend()
+        plt.legend(loc='upper right')
         plt.subplots_adjust(hspace=0.4)
         #save fig
         path = "dp_"+str(x*100)+"cm-"+str(y*100)+"cm.png"
-        #plt.savefig(path)
+        if save: plt.savefig(path)
 
 
     return 0
 
 def Q4_Surface_Averaged_Mobility(dp,D_comp):
     m_mn = ss_modalMass(rho,h,a,b)              # Calculate modal mass
-    firstModeOmega = Q1Q2_Res_Freqs(D_comp).real      # Calculate the frequency for the first 10 modes
+    firstModeOmega = Q1Q2_Res_Freqs(D_comp)[0].real      # Calculate the frequency for the first 10 modes
 
     omega_peak1=firstModeOmega[0]               # Determine the frequencies for the modes we are interested in
-    omega_peak2=firstModeOmega[2]               # Determined via trial and error
-    omega_peak3=firstModeOmega[7]
+    omega_peak2=firstModeOmega[1]               # Determined via trial and error
+    omega_peak3=firstModeOmega[2]
 
     # Finding the argument for the value in the omega vector closest
     # to the omega peak values calculated above
@@ -166,7 +173,7 @@ def Q4_Surface_Averaged_Mobility(dp,D_comp):
 
     # Perform calculation for each drive point.
     for i in range(len(dp)):
-        k_range = range(1, 10)  # Set  range of k, which is the number of integration points
+        k_range = range(1, 11)  # Set  range of k, which is the number of integration points
 
         x_f = dp[i][0]                                      # Set x_f & y_f as the drive point coordinates
         y_f = dp[i][1]
@@ -192,7 +199,7 @@ def Q4_Surface_Averaged_Mobility(dp,D_comp):
                 for y_k in y_k_array:
                     x_r = x_k -(dx/2.)       # obtain value in the MIDDLE of the increment
                     y_r = y_k -(dy/2.)       # obtain value in the MIDDLE of the increment
-                    vK_Ff_tot += tot_drivePoint_mobility(x_r,x_f,y_r,y_f,MN,MN,a,b,D_comp,rho,h,omega,m_mn)
+                    vK_Ff_tot += np.abs(tot_drivePoint_mobility(x_r,x_f,y_r,y_f,MN,MN,a,b,D_comp,rho,h,omega,m_mn))
 
             vK_Ff_savg = np.abs(vK_Ff_tot)*dAk/((a*b))      # Calculate surface-averaged mobility
 
@@ -213,6 +220,14 @@ def Q4_Surface_Averaged_Mobility(dp,D_comp):
         k_range = np.array(k_range)**2
 
         plt.subplot(212)
+        for l in range(len(mode1_array)):
+            fact = 0.95
+            conv1 = closeEnough(mode1_array[l],mode1_array[-1],fact)
+            conv2 = closeEnough(mode2_array[l],mode2_array[-1],fact)
+            conv3 = closeEnough(mode3_array[l],mode3_array[-1],fact)
+            if conv1 and conv2 and conv3:
+                plt.axvline(k_range[l],color="black")
+                break
         plt.title("Mobility Magnitude vs k")
         plt.plot(k_range,mode1_array,label="mode1")
         plt.plot(k_range,mode2_array,label="mode2")
@@ -223,31 +238,35 @@ def Q4_Surface_Averaged_Mobility(dp,D_comp):
         plt.legend(loc=1)
         plt.subplots_adjust(hspace=0.4)
         path = "savg-dp_"+str(x_f)+"-"+str(y_f)+".png"
-        #plt.savefig(path)
+        if save: plt.savefig(path)
 
     return 0
 
 def Q5_Variable_Loss_Factor(dp):
-    print dp
-    print [dp[2]]
-
-    #for i in range(len(dp[2]))
+    '''
     D_comp = ssint.flex_rig(E,h,v,eta=0.04)
     Q3_Drive_Point_Mobility([dp[2]],D_comp)
     Q4_Surface_Averaged_Mobility([dp[2]],D_comp)
-
-
+    '''
     D_comp = ssint.flex_rig(E,h,v,eta=0.4)
     Q3_Drive_Point_Mobility([dp[2]],D_comp)
     Q4_Surface_Averaged_Mobility([dp[2]],D_comp)
-
-
 
     return 0
 
 #################
 #### Methods ####
 #################
+
+def closeEnough(val1,val2,factor):
+
+    dif = np.abs(val1 - val2)
+    comp = (1.-factor)*val2
+
+    if dif > comp:
+        return False
+    else:
+        return True
 
 def find_first_max(arr):
     for i in range(1,len(arr)):
