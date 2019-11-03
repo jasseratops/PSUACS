@@ -42,14 +42,14 @@ def main(args):
 
         S_mn_gauss, gamma = rad_eff_Wallace_gauss(a,b,m,n,N,k)
         #S_mn, _ = rad_eff_Wallace(a,b,m,n,theta,phi,k)
-        #S_mn_lowka,_ = rad_eff_low_ka(a,b,m,n,k)
+        S_mn_lowka,_ = rad_eff_low_ka(a,b,m,n,k)
         #S_mn, gamma = rad_eff_low_ka(a,b,m,n,k)
 
         #plt.loglog(gamma,S_mn)
         plt.loglog(gamma,S_mn_gauss,label=str(m)+","+str(n))
-        #plt.loglog(gamma,S_mn_lowka)
+        plt.loglog(gamma,S_mn_lowka,label="low_ka" + str(m)+","+str(n))
         plt.xlim(0.03,3)
-        plt.ylim(1E-5,4)
+        #plt.ylim(1E-5,)
         #plt.ylim(S_mn[1],2)
     plt.legend()
     plt.show()
@@ -181,7 +181,7 @@ def rad_eff_low_ka(a,b,m,n,k):
         n_term = (1.-(8./((n*pi)**2)))*(b/a)
 
     elif m_odd != n_odd:
-        A = 8./(3.*pi)*(arf**2)(gamma**4)*b/a
+        A = (8./(3.*pi))*(arf**2)*(gamma**4)*b/a
         B = m*n*pi*(gamma**2)/20.
 
         if m_odd:
