@@ -22,21 +22,30 @@ def main(args):
 
     m=1
     n=1
+    mn = [[1,1],
+          [1,3],
+          [3,3],
+          [1,2],
+          [2,3],
+          [2,2]]
 
     N = 128
+
     phi = np.linspace(0,pi/2.,N)
     theta = np.linspace(0,pi/2.,N)
 
 
-    #phi,theta = np.meshgrid(phi, theta)
-
-    S_mn, gamma = rad_eff_Wallace_gauss(a,b,m,n,N,k)
-
+    S_mn_gauss, gamma = rad_eff_Wallace_gauss(a,b,m,n,N,k)
+    S_mn, _ = rad_eff_Wallace(a,b,m,n,theta,phi,k)
+    S_mn_lowka,_ = rad_eff_low_ka(a,b,m,n,k)
     #S_mn, gamma = rad_eff_low_ka(a,b,m,n,k)
 
     plt.figure()
     plt.loglog(gamma,S_mn)
-    plt.xlim(0,3)
+    plt.loglog(gamma,S_mn_gauss)
+    plt.loglog(gamma,S_mn_lowka)
+    plt.xlim(0.03,3)
+    plt.ylim(1E-5,4)
     #plt.ylim(S_mn[1],2)
     plt.show()
 
@@ -78,7 +87,8 @@ def rad_eff_Wallace(a,b,m,n,theta,phi,k):
                 num_b = sin(beta/2.)
 
             num = num_a*num_b
-            denom = (((alpha/m*pi)**2)-1)*(((beta/n*pi)**2)-1)
+
+            denom = (((alpha/(m*pi))**2)-1)*(((beta/(n*pi))**2)-1)
             z = ((num/denom)**2)*weight
             #print z
             S_mn += z
@@ -90,9 +100,13 @@ def rad_eff_Wallace(a,b,m,n,theta,phi,k):
 def rad_eff_Wallace_gauss(a,b,m,n,N,k):
     S_mn = np.zeros_like(k)
 
-    x_i,w_i = gauleg(0.,pi/2.,N)
-    x_j,w_j = gauleg (0.,pi/2.,N)
-
+    x_i_array, w_i_array = gauleg(0.,pi/2.,N)
+    x_j_array, w_j_array = gauleg(0.,pi/2.,N)
+    '''
+    plt.figure()
+    plt.plot(x_i_array,w_i_array)
+    plt.plot(x_j_array,w_j_array)
+    '''
     A = 64.*(k**2)*a*b/((pi**6)*(m*n)**2)
 
     k_m = m*pi/a
@@ -104,11 +118,24 @@ def rad_eff_Wallace_gauss(a,b,m,n,N,k):
     m_odd = bool(m%2)
     n_odd = bool(n%2)
 
-    for i in range(N):
-        for j in range(N):
-            alpha = k*a*sin(x_i)*cos(x_j)
-            beta  = k*b*sin(x_i)*sin(x_j)
 
+    #print N
+    fig1 = plt.figure()
+    for i in range(N):
+        x_i = x_i_array[i]
+        w_i = w_i_array[i]
+
+        for j in range(N):
+            #print "(" + str(i) + "," + str(j) + "):"
+            x_j = x_j_array[j]
+            w_j = w_j_array[j]
+
+            alpha = k*a*sin(x_i)*cos(x_j)
+            beta = k*b*sin(x_i)*sin(x_j)
+            '''
+            print alpha/(m*pi)
+            print beta/(n*pi)
+            '''
             if m_odd:
                 num_a = cos(alpha/2.)
             else:
@@ -120,15 +147,18 @@ def rad_eff_Wallace_gauss(a,b,m,n,N,k):
                 num_b = sin(beta/2.)
 
             num = num_a*num_b
-            denom = (((alpha/m*pi)**2)-1)*(((beta/n*pi)**2)-1)
-            g_x = ((num/denom)**2)
+            denom = (((alpha/(m*pi))**2)-1)*(((beta/(n*pi))**2)-1)
+            g_x = A*((num/denom)**2)
+
             S_mn += w_i*w_j*g_x*sin(x_i)
 
-        S_mn *= A
+        if not bool(i%10):
+            plt.loglog(gamma,g_x,label=str(i))
 
-        return S_mn, gamma
+        plt.legend()
+        plt.xlim(0.03,3)
 
-
+    return S_mn, gamma
 
 def rad_eff_low_ka(a,b,m,n,k):
     k_m = m*pi/a
@@ -174,14 +204,14 @@ def rad_eff_low_ka(a,b,m,n,k):
     return S_mn, gamma
 
 def gauleg(X1,X2,N):
-    print N
     eps = 3e-14
     M = (N+1)/2
+
     XM = 0.5*(X2+X1)
     XL = 0.5*(X2-X1)
 
-    X = np.zeros(M)
-    W = np.zeros(M)
+    X = np.zeros(N)
+    W = np.zeros(N)
 
     for i in range(M):
         i+=1
@@ -192,19 +222,18 @@ def gauleg(X1,X2,N):
             P1 = 1
             P2 = 0
             for j in range(N):
-                j+1
+                j+=1
                 P3 = P2
                 P2 = P1
                 P1 = ((2*j-1)*Z*P2-(j-1)*P3)/j
             PP = N*(Z*P1-P2)/(Z*Z-1)
             Z1 = Z
             Z = Z1-P1/PP
-        print i
         i-=1
         X[i] = XM-XL*Z
-        X[N+1-i] = XM+XL*Z
+        X[-i-1] = XM+XL*Z
         W[i]= 2*XL/((1-Z**2)*PP**2)
-        W[N+1-i] = W[i]
+        W[-i-1] = W[i]
 
     return X,W
 
