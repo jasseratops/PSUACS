@@ -29,24 +29,29 @@ def main(args):
           [2,3],
           [2,2]]
 
-    N = 128
+    N = 32
 
     phi = np.linspace(0,pi/2.,N)
     theta = np.linspace(0,pi/2.,N)
 
-
-    S_mn_gauss, gamma = rad_eff_Wallace_gauss(a,b,m,n,N,k)
-    S_mn, _ = rad_eff_Wallace(a,b,m,n,theta,phi,k)
-    S_mn_lowka,_ = rad_eff_low_ka(a,b,m,n,k)
-    #S_mn, gamma = rad_eff_low_ka(a,b,m,n,k)
-
     plt.figure()
-    plt.loglog(gamma,S_mn)
-    plt.loglog(gamma,S_mn_gauss)
-    plt.loglog(gamma,S_mn_lowka)
-    plt.xlim(0.03,3)
-    plt.ylim(1E-5,4)
-    #plt.ylim(S_mn[1],2)
+
+    for i in range(len(mn)):
+        m = mn[i][0]
+        n = mn[i][1]
+
+        S_mn_gauss, gamma = rad_eff_Wallace_gauss(a,b,m,n,N,k)
+        #S_mn, _ = rad_eff_Wallace(a,b,m,n,theta,phi,k)
+        #S_mn_lowka,_ = rad_eff_low_ka(a,b,m,n,k)
+        #S_mn, gamma = rad_eff_low_ka(a,b,m,n,k)
+
+        #plt.loglog(gamma,S_mn)
+        plt.loglog(gamma,S_mn_gauss,label=str(m)+","+str(n))
+        #plt.loglog(gamma,S_mn_lowka)
+        plt.xlim(0.03,3)
+        plt.ylim(1E-5,4)
+        #plt.ylim(S_mn[1],2)
+    plt.legend()
     plt.show()
 
 
@@ -120,7 +125,6 @@ def rad_eff_Wallace_gauss(a,b,m,n,N,k):
 
 
     #print N
-    fig1 = plt.figure()
     for i in range(N):
         x_i = x_i_array[i]
         w_i = w_i_array[i]
@@ -152,11 +156,6 @@ def rad_eff_Wallace_gauss(a,b,m,n,N,k):
 
             S_mn += w_i*w_j*g_x*sin(x_i)
 
-        if not bool(i%10):
-            plt.loglog(gamma,g_x,label=str(i))
-
-        plt.legend()
-        plt.xlim(0.03,3)
 
     return S_mn, gamma
 
