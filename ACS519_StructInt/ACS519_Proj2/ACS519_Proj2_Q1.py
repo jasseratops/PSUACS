@@ -221,20 +221,20 @@ def rad_eff_low_ka(a,b,m,n,k):
 
     if m_odd and n_odd:
         A = (32./(m*n*(pi**3)))*arf*(gamma**2)
-        B = arf*(m*n*pi/12.)*(gamma**2)
+        B = arf*m*n*pi*(gamma**2)/12.
         m_term = (1.-(8./((m*pi)**2)))*(a/b)
         n_term = (1.-(8./((n*pi)**2)))*(b/a)
 
     elif m_odd != n_odd:
-        B = arf*m*n*pi*(gamma**2)/20.
+        B = arf * m * n * pi * (gamma ** 2)/20.
 
         if m_odd:
-            A = (8. / (3. * pi)) * (arf ** 2) * (gamma ** 4) * b/a
+            A = (8./(3.*pi)) * (arf**2) * (gamma ** 4) * b/a
             m_term = (1. - (8. / ((m * pi) ** 2))) * (a / b)
             n_term = (1. - (24./ ((n * pi) ** 2))) * (b / a)
 
         else:
-            A = (8. / (3. * pi)) * (arf ** 2) * (gamma ** 4) * a/b
+            A = (8. / (3. * pi)) * (arf ** 2) * (gamma ** 4)*a/b
             m_term = (1. - (24./ ((m * pi) ** 2))) * (a / b)
             n_term = (1. - (8. / ((n * pi) ** 2))) * (b / a)
 
@@ -242,7 +242,7 @@ def rad_eff_low_ka(a,b,m,n,k):
         print m
         print n
         A = (2.*m*n*pi/15.)*(arf**3)*(gamma**6)
-        B = arf*(5.*m*n*pi/64.)*(gamma**2)
+        B = arf*m*n*pi*(gamma**2)*(5./64.)
         m_term = (1. - (24. / ((m * pi) ** 2))) * (a / b)
         n_term = (1. - (24. / ((n * pi) ** 2))) * (b / a)
 
