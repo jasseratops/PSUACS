@@ -9,52 +9,79 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy import pi, sin, cos, tan, exp
 
-
 def main(args):
-    c = 343.
-    f = np.linspace(1,1.E3,1024)
-    omega = 2.*pi*f
-    k = omega/c
-    #print k
-
-    a = 1.
-    b = 1.
-
-    m=1
-    n=1
-    mn = [[1,1],
+    mn_fig2 = [[1,1],
           [1,3],
           [3,3],
           [1,2],
           [2,3],
           [2,2]]
+    ab_fig2 = np.ones_like(mn_fig2)
 
-    N = 32
+    mn_fig3 = [[1,12],
+          [1,11],
+          [2,12],
+          [12,12],
+          [11,12],
+          [11,11]]
+    ab_fig3 = np.ones_like(mn_fig3)
 
-    phi = np.linspace(0,pi/2.,N)
-    theta = np.linspace(0,pi/2.,N)
+    ab_fig6 = [[1,1],
+               [1,3],
+               [1,5],
+               [1,4],
+               [1,2]]
+    mn_fig6 = [[1,1],
+               [1,3],
+               [1,5],
+               [1,4],
+               [1,2]]
 
-    plt.figure()
+    RadEff_Plot(ab_fig2,mn_fig2,ab_leg=False,low_ka=True,title_str="Wallace, Fig 2")
+    RadEff_Plot(ab_fig3,mn_fig3,ab_leg=False,low_ka=True,title_str="Wallace, Fig 3")
+    RadEff_Plot(ab_fig6,mn_fig6,ab_leg=True,low_ka=False,title_str="Wallace, Fig 6")
+
+    plt.show()
+
+    return 0
+
+
+def RadEff_Plot(ab_array,mn_array,ab_leg,low_ka,title_str):
+    c = 343.
+    f = np.linspace(0.01,10.E3,2048)
+    omega = 2.*pi*f
+    k = omega/c
+
+    N = 64
+
+    mn = mn_array
+    ab = ab_array
+
+    plt.figure(figsize=(5,7))
 
     for i in range(len(mn)):
         m = mn[i][0]
         n = mn[i][1]
+        a = ab[i][0]
+        b = ab[i][1]
 
         S_mn_gauss, gamma = rad_eff_Wallace_gauss(a,b,m,n,N,k)
-        #S_mn, _ = rad_eff_Wallace(a,b,m,n,theta,phi,k)
-        S_mn_lowka,_ = rad_eff_low_ka(a,b,m,n,k)
-        #S_mn, gamma = rad_eff_low_ka(a,b,m,n,k)
+        ab_str = ""
 
-        #plt.loglog(gamma,S_mn)
-        plt.loglog(gamma,S_mn_gauss,label=str(m)+","+str(n))
-        plt.loglog(gamma,S_mn_lowka,label="low_ka" + str(m)+","+str(n))
-        plt.xlim(0.03,3)
-        #plt.ylim(1E-5,)
-        #plt.ylim(S_mn[1],2)
+        if ab_leg:
+            ab_str = " b/a = " + str(b/a)
+
+        p = plt.loglog(gamma,S_mn_gauss,label=str(m)+","+str(n)+ab_str)
+
+        if low_ka:
+            S_mn_lowka,_ = rad_eff_low_ka(a,b,m,n,k)
+            plt.loglog(gamma,S_mn_lowka,label=str(m)+","+str(n) + " low_ka",linestyle=":", color = p[0].get_color())
+
+        plt.title(title_str)
+        plt.xlim(0.003,3)
+        plt.ylim(1E-8,4)
+        plt.grid(True,which="both",axis="both")
     plt.legend()
-    plt.show()
-
-
     return 0
 
 def rad_eff_Wallace(a,b,m,n,theta,phi,k):
