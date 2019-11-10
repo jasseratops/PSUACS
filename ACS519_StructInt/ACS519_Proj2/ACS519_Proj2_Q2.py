@@ -9,28 +9,38 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy import pi, sin, cos, tan, exp
 import ACS519_StructInt.soundStructInt as ssint
+import xlwt
+from xlwt import Workbook
 
 
 def main(args):
-    ### Conversion factors
-    pcf_to_kgm3 = 16.02
-    in_to_m = 0.0254
-    psi_to_Pa = 6894.76
-    ksi_to_Pa = 1000*psi_to_Pa
+    ### Excel setup for table
+    wb = Workbook()
+    sheet1 = wb.add_sheet("Sheet 1")
+    sheet1.write(0,0,'m')
+    sheet1.write(0,1,'n')
+    sheet1.write(0,2,"Frequency Al")
+    sheet1.write(0,3,"Frequency sw")
+    sheet1.write(0,4,"Rad Eff Al")
+    sheet1.write(0,5,"Rad Eff sw")
 
     ### Plot Setup
     f = np.linspace(1,4.E3,1024)
     omega = f*2*pi
-    m_array = np.arange(2)+1
-    n_array = np.arange(2)+1
+    m_array = np.arange(5)+1
+    n_array = np.arange(5)+1
     a = 0.5
     b = 0.4
+
+    ### Conversion factors
+    pcf_to_kgm3 = 16.02
+    in_to_m = 0.0254
+    ksi_to_Pa = 6.895E6
 
     ### Panel Dimensions.
     h_Al = 0.25 * in_to_m
     t_fs = 0.02 * in_to_m
-    h_core = 0.25 * in_to_m
-
+    h_core = 0.5 * in_to_m
 
     ### Material Properties for Aluminum (6061-T6)
     E_Al = 68.9E9  # Pa
@@ -59,47 +69,87 @@ def main(args):
 
     f_Al_array = np.zeros(len(m_array)*len(n_array))
     f_sw_array = np.zeros(len(m_array)*len(n_array))
+    rad_mn_Al_array = np.zeros(len(m_array)*len(n_array))
+    rad_mn_sw_array = np.zeros(len(m_array)*len(n_array))
 
     c_0 = 343.
     k = omega/c_0
     f_cr_Al = critical_frq_panel(c_Al,c_0,omega)/(2*pi)
     f_cr_sw = critical_frq_sandwich(D,N,u_s,c_0)/(2*pi)
 
-    print f_cr_Al
-    print f_cr_sw
+    print "f_cr_Al: " + str(f_cr_Al)
+    print "f_cr_sw: " + str(f_cr_sw)
+    print "m,n|fAL|fSw|re_Al|re_Sw"
+    print "-"*23
 
     for i_m in range(len(m_array)):
         m = m_array[i_m]
         for i_n in range(len(n_array)):
             n = n_array[i_n]
             i = i_m*len(n_array)+i_n
+
+            ### Aluminum calculations
             w_Al = ssint.ss_thickplate_frq(c_Al,omega,m,n,a,b)
             f_Al = w_Al.real/(2*pi)
-            f_Al_array[i] = f_Al
             rad_mn_Al = rad_eff_Wallace_gauss(a,b,m,n,N=64,k=w_Al/c_0)[0].real
 
+            f_Al_array[i] = f_Al
+            rad_mn_Al_array[i] = rad_mn_Al
+
+            ### Sandwich panel calculations
             w_sw = ssint.ss_thickplate_frq(c_b_sw,omega,m,n,a,b)
             f_sw = w_sw.real/(2*pi)
-            f_sw_array[i] = f_sw
             rad_mn_sw = rad_eff_Wallace_gauss(a,b,m,n,N=64,k=w_sw/c_0)[0].real
 
+            f_sw_array[i] = f_sw
+            rad_mn_sw_array[i] = rad_mn_sw
 
-            print str(m)+","+str(n)+"|"\
-                  +str(int(f_Al))+"|"+str(int(f_sw))+"|"\
-                  +str('%.3f'%rad_mn_Al)+"|"+str('%.3f'%rad_mn_sw)
+            ### Excel write:
+            sheet1.write(i+1, 0,m)
+            sheet1.write(i+1, 1,n)
+            sheet1.write(i+1, 2,f_Al)
+            sheet1.write(i+1, 3,f_sw)
+            sheet1.write(i+1, 4,str(rad_mn_Al))
+            sheet1.write(i+1, 5,str(rad_mn_sw))
+            ### Table print
+            print str(m)+","+str(n)+","\
+                  +str(int(round(f_Al)))+","+str(int(round(f_sw)))+","\
+                  +str('%.3f'%rad_mn_Al)+","+str('%.3f'%rad_mn_sw)
+
+    #wb.save("ACS519_Proj2_Q2.xls")
+    plt.figure()
+    plt.title("Radiation Efficiency, Panel vs. Sandwich")
+    plt.scatter(f_Al_array,rad_mn_Al_array,
+                marker="s",edgecolors="black",facecolors="black",label="Aluminum Panel")
+    plt.scatter(f_sw_array,rad_mn_sw_array,
+                marker="s",edgecolors="black",facecolors="none",label="Sandwich Panel")
+
+    plt.axvline(f_cr_Al,color="black",label=r"Aluminum Panel $f_{cr}$")
+    plt.axvline(f_cr_sw,color="black",linestyle=":",label=r"Sandwich Panel $f_{cr}$")
+    plt.grid(True, which="both", axis="both")
+    plt.xlim(0,4.E3)
+    plt.xlabel("Frequency [Hz]")
+    plt.ylabel("Radiation Efficiency")
+    plt.legend()
+    plt.show()
 
     return 0
 
 def flex_rig_sandwich(E_fs,t_fs,h_core,v_fs):
-    D = E_fs*t_fs*((h_core+t_fs)**2)/(2*((1-v_fs)**2))
+    D = E_fs*t_fs*((h_core+t_fs)**2)/(2*((1-(v_fs**2))))
     return D
 
 def shear_rig_sandwich(G_core,t_fs,h_core):
-    N = G_core*h_core*(1+((t_fs/h_core)**2))
+    N = G_core*h_core*((1+(t_fs/h_core))**2)
     return N
 
 def panel_wavespeed_sandwich(N,u_s,D,omega):
-    c_b_2 = 2*N/(u_s+np.sqrt((u_s**2)+((4*u_s*(N**2))/((omega**2)*D))))
+    num = 2*N
+    denom_a = u_s
+    denom_b = np.sqrt((u_s**2)+((4*u_s*(N**2))/((omega**2)*D)))
+    denom = denom_a+denom_b
+
+    c_b_2 = num/denom
     c_b = np.sqrt(c_b_2)
     return c_b
 
