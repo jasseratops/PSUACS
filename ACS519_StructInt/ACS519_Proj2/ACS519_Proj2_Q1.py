@@ -8,6 +8,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy import pi, sin, cos, tan, exp
+import time
+
 
 def main(args):
     mn_fig2 = [[1,1],
@@ -44,7 +46,13 @@ def main(args):
                 [11,11]]
     ab_notes = np.ones_like(mn_notes)
 
-    '''
+    mn_lowIntDens2_2 = [[2, 2]]
+    ab_lowIntDens2_2 = np.ones_like(mn_lowIntDens2_2)
+
+    mn_lowIntDens11_11 = [[11, 11]]
+    ab_lowIntDens11_11 = np.ones_like(mn_lowIntDens11_11)
+
+
     RadEff_Plot(ab_fig2,mn_fig2,N=64,ab_leg=False,low_ka=False,title_str="Wallace, Fig 2")
     RadEff_Plot(ab_fig3,mn_fig3,N=64,ab_leg=False,low_ka=False,title_str="Wallace, Fig 3")
     RadEff_Plot(ab_fig6,mn_fig6,N=64,ab_leg=True,low_ka=False,title_str="Wallace, Fig 6")
@@ -55,9 +63,14 @@ def main(args):
 
     RadEff_Plot(ab_fig2,mn_fig2,N=64,ab_leg=False,low_ka=True,title_str="Wallace, Fig 2, low ka")
     RadEff_Plot(ab_fig3,mn_fig3,N=64,ab_leg=False,low_ka=True,title_str="Wallace, Fig 3, low ka")
+
+    RadEff_Plot_lowIntDens(ab_lowIntDens2_2,mn_lowIntDens2_2,"Radiation Efficiency for (2,2) Mode")
+    RadEff_Plot_lowIntDens(ab_lowIntDens11_11,mn_lowIntDens11_11,"Radiation Efficiency for (11,11) Mode")
+
     '''
     RadEff_Plot(ab_notes,mn_notes,N=64,ab_leg=False,low_ka=True,title_str="low_ka notes")
-
+    RadEff_Plot_comp([[1,1]],[[11,11]],N=64,ab_leg=False,low_ka=False,title_str="Gauss vs. Riemann")
+    '''
 
     plt.show()
 
@@ -92,11 +105,11 @@ def RadEff_Plot(ab_array,mn_array,N,ab_leg,low_ka,title_str):
 
         if low_ka:
             S_mn_lowka,_ = rad_eff_low_ka(a,b,m,n,k)
-            plt.loglog(gamma,S_mn_lowka,label=str(m)+","+str(n) + " low_ka",linestyle=":", color = p[0].get_color())
+            plt.loglog(gamma,S_mn_lowka,linestyle=":", color = p[0].get_color())
 
     plt.title(title_str)
-    plt.xlim(0.003,3)
-    plt.ylim(1E-8,4)
+    plt.xlim(0.03,3)
+    plt.ylim(1E-5,4)
     plt.xlabel(r"$\gamma$")
     plt.ylabel("Radiation Efficiency")
     plt.grid(True,which="both",axis="both")
@@ -105,9 +118,92 @@ def RadEff_Plot(ab_array,mn_array,N,ab_leg,low_ka,title_str):
 
     return 0
 
-def rad_eff_Wallace(a,b,m,n,theta,phi,k):
+def RadEff_Plot_comp(ab_array,mn_array,N,ab_leg,low_ka,title_str):
+    c = 343.
+    f = np.linspace(0.01,10.E3,2048)
+    omega = 2.*pi*f
+    k = omega/c
+
+    mn = mn_array
+    ab = ab_array
+
+    plt.figure(figsize=(5,7))
+    plt.subplots_adjust(left=0.17)
+
+    for i in range(len(mn)):
+        m = mn[i][0]
+        n = mn[i][1]
+        a = ab[i][0]
+        b = ab[i][1]
+
+        S_mn_gauss, gamma = rad_eff_Wallace_gauss(a,b,m,n,N,k)
+        S_mn_riemann,_ = rad_eff_Wallace(a,b,m,n,N,k)
+        ab_str = ""
+
+        if ab_leg:
+            ab_str = " b/a = " + str(b/a)
+
+        p = plt.loglog(gamma,S_mn_gauss,label=str(m)+","+str(n)+" Gauss")
+        p = plt.loglog(gamma,S_mn_riemann,label=str(m)+","+str(n)+" Riemann")
+
+
+    plt.title(title_str)
+    plt.xlim(0.003,3)
+    plt.ylim(1E-8,4)
+    plt.xlabel(r"$\gamma$")
+    plt.ylabel("Radiation Efficiency")
+    plt.grid(True,which="both",axis="both")
+    plt.legend()
+
+    return 0
+
+def RadEff_Plot_lowIntDens(ab_array,mn_array,title_str):
+    c = 343.
+    f = np.linspace(0.01,10.E3,2048)
+    omega = 2.*pi*f
+    k = omega/c
+
+    mn = mn_array
+    ab = ab_array
+
+    plt.figure(figsize=(5,7))
+    plt.subplots_adjust(left=0.17)
+
+    for i in range(len(mn)):
+        m = mn[i][0]
+        n = mn[i][1]
+        a = ab[i][0]
+        b = ab[i][1]
+
+        S_mn_gauss_16, gamma = rad_eff_Wallace_gauss(a,b,m,n,16,k)
+        S_mn_gauss_32, _ = rad_eff_Wallace_gauss(a,b,m,n,32,k)
+        S_mn_gauss_64, _ = rad_eff_Wallace_gauss(a,b,m,n,64,k)
+
+        ab_str = ""
+
+        p = plt.loglog(gamma,S_mn_gauss_16,label="N=16")
+        p = plt.loglog(gamma,S_mn_gauss_64,label="N=32")
+        p = plt.loglog(gamma,S_mn_gauss_32,label="N=64")
+
+    plt.title(title_str)
+    plt.xlim(0.03,3)
+    plt.ylim(1E-5,4)
+    plt.xlabel(r"$\gamma$")
+    plt.ylabel("Radiation Efficiency")
+    plt.grid(True,which="both",axis="both")
+    plt.legend()
+    #plt.savefig("ACS519_Proj2_Q2 " + title_str+".png")
+
+    return 0
+
+
+
+def rad_eff_Wallace(a,b,m,n,N,k):
+    start = time.time()
     A = 64.*(k**2)*a*b/((pi**6)*(m*n)**2)
 
+    theta = np.linspace(0,pi/2.,N)
+    phi = np.linspace(0,pi/2.,N)
     k_m = m*pi/a
     k_n = n*pi/b
     k_mn = np.sqrt((k_m**2)+(k_n**2))   # modal wavenumber
@@ -148,9 +244,13 @@ def rad_eff_Wallace(a,b,m,n,theta,phi,k):
 
     S_mn *= A
 
+    end = time.time()
+    print "Riemann: " + str(end-start)
+
     return S_mn, gamma
 
 def rad_eff_Wallace_gauss(a,b,m,n,N,k):
+    start = time.time()
     S_mn = np.zeros_like(k)
 
     x_i_array, w_i_array = gauleg(0.,pi/2.,N)
@@ -204,6 +304,9 @@ def rad_eff_Wallace_gauss(a,b,m,n,N,k):
 
             S_mn += w_i*w_j*g_x*sin(x_i)
 
+    end = time.time()
+
+    #print "Gauss: " + str(end-start)
 
     return S_mn, gamma
 
@@ -234,13 +337,11 @@ def rad_eff_low_ka(a,b,m,n,k):
             n_term = (1. - (24./ ((n * pi) ** 2))) * (b / a)
 
         else:
-            A = (8. / (3. * pi)) * (arf ** 2) * (gamma ** 4)*a/b
+            A = (8./(3.*pi)) * (arf**2) * (gamma ** 4) * a/b
             m_term = (1. - (24./ ((m * pi) ** 2))) * (a / b)
             n_term = (1. - (8. / ((n * pi) ** 2))) * (b / a)
 
     else:
-        print m
-        print n
         A = (2.*m*n*pi/15.)*(arf**3)*(gamma**6)
         B = arf*m*n*pi*(gamma**2)*(5./64.)
         m_term = (1. - (24. / ((m * pi) ** 2))) * (a / b)
