@@ -137,6 +137,7 @@ def cavity_modal_density(f,l1,l2,l3,c,n_room):
     A = 2*((l1*l2)+(l1*l3)+(l2*l3))
     A_modes = A*omega/(8.*pi*(c**2))
 
+
     for i in range(len(omega)):
         if f < test_cond:
             n_cavity = A_modes
