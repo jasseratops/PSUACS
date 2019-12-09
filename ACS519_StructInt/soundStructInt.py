@@ -113,3 +113,224 @@ def drivePoint_panelShape(x_r,x_f,y_r,y_f,m,n,a,b):
 def ss_modalMass(rho,h,a,b):
     m_mn = rho*h*a*b/4.
     return m_mn
+
+def critical_frq_panel(c_B,c_0,omega):
+    i = np.argmin(np.abs(c_B-c_0))
+    omega_cr = omega[i]
+    return omega_cr
+
+def rad_eff_Wallace(a,b,m,n,N,k):
+    start = time.time()
+    A = 64.*(k**2)*a*b/((pi**6)*(m*n)**2)
+
+    theta = np.linspace(0,pi/2.,N)
+    phi = np.linspace(0,pi/2.,N)
+    k_m = m*pi/a
+    k_n = n*pi/b
+    k_mn = np.sqrt((k_m**2)+(k_n**2))   # modal wavenumber
+
+    gamma = k/k_mn      # wavenumber ratio
+
+    m_odd = bool(m%2)
+    n_odd = bool(n%2)
+
+    dTheta = theta[1]-theta[0]
+    dPhi = phi[1]-phi[0]
+
+    S_mn = np.zeros_like(k)
+
+    for i in range(len(theta)):
+        weight = sin(theta[i]) * dTheta * dPhi
+        #print weight
+        for l in range(len(phi)):
+            alpha = k*a*sin(theta[i]+(dTheta/2.))*cos(phi[l]+(dPhi/2.))
+            beta  = k*b*sin(theta[i]+(dTheta/2.))*sin(phi[l]+(dPhi/2.))
+
+            if m_odd:
+                num_a = cos(alpha/2.)
+            else:
+                num_a = sin(alpha/2.)
+
+            if n_odd:
+                num_b = cos(beta/2.)
+            else:
+                num_b = sin(beta/2.)
+
+            num = num_a*num_b
+
+            denom = (((alpha/(m*pi))**2)-1)*(((beta/(n*pi))**2)-1)
+            z = ((num/denom)**2)*weight
+            #print z
+            S_mn += z
+
+    S_mn *= A
+
+    end = time.time()
+    print "Riemann: " + str(end-start)
+
+    return S_mn, gamma
+
+def rad_eff_Wallace_gauss(a,b,m,n,N,k):
+    start = time.time()
+    S_mn = np.zeros_like(k)
+
+    x_i_array, w_i_array = gauleg(0.,pi/2.,N)
+    x_j_array, w_j_array = gauleg(0.,pi/2.,N)
+    '''
+    plt.figure()
+    plt.plot(x_i_array,w_i_array)
+    plt.plot(x_j_array,w_j_array)
+    '''
+    A = 64.*(k**2)*a*b/((pi**6)*(m*n)**2)
+
+    k_m = m*pi/a
+    k_n = n*pi/b
+    k_mn = np.sqrt((k_m**2)+(k_n**2))   # modal wavenumber
+
+    gamma = k/k_mn      # wavenumber ratio
+
+    m_odd = bool(m%2)
+    n_odd = bool(n%2)
+
+
+    #print N
+    for i in range(N):
+        x_i = x_i_array[i]
+        w_i = w_i_array[i]
+
+        for j in range(N):
+            #print "(" + str(i) + "," + str(j) + "):"
+            x_j = x_j_array[j]
+            w_j = w_j_array[j]
+
+            alpha = k*a*sin(x_i)*cos(x_j)
+            beta = k*b*sin(x_i)*sin(x_j)
+            '''
+            print alpha/(m*pi)
+            print beta/(n*pi)
+            '''
+            if m_odd:
+                num_a = cos(alpha/2.)
+            else:
+                num_a = sin(alpha/2.)
+
+            if n_odd:
+                num_b = cos(beta/2.)
+            else:
+                num_b = sin(beta/2.)
+
+            num = num_a*num_b
+            denom = (((alpha/(m*pi))**2)-1)*(((beta/(n*pi))**2)-1)
+            g_x = A*((num/denom)**2)
+
+            S_mn += w_i*w_j*g_x*sin(x_i)
+
+    end = time.time()
+
+    #print "Gauss: " + str(end-start)
+
+    return S_mn, gamma
+
+def rad_eff_low_ka(a,b,m,n,k):
+    k_m = m*pi/a
+    k_n = n*pi/b
+    k_mn = np.sqrt((k_m**2)+(k_n**2))   # modal wavenumber
+    gamma = k/k_mn      # wavenumber ratio
+
+    arf = ((a * n) / (m * b)) + ((m*b)/(a*n))   # aspect ratio factor
+    S_mn = np.zeros_like(k)      # initialize radiation efficiency vector
+
+    m_odd = bool(m%2)
+    n_odd = bool(n%2)
+
+    if m_odd and n_odd:
+        A = (32./(m*n*(pi**3)))*arf*(gamma**2)
+        B = arf*m*n*pi*(gamma**2)/12.
+        m_term = (1.-(8./((m*pi)**2)))*(a/b)
+        n_term = (1.-(8./((n*pi)**2)))*(b/a)
+
+    elif m_odd != n_odd:
+        B = arf * m * n * pi * (gamma ** 2)/20.
+
+        if m_odd:
+            A = (8./(3.*pi)) * (arf**2) * (gamma ** 4) * b/a
+            m_term = (1. - (8. / ((m * pi) ** 2))) * (a / b)
+            n_term = (1. - (24./ ((n * pi) ** 2))) * (b / a)
+
+        else:
+            A = (8./(3.*pi)) * (arf**2) * (gamma ** 4) * a/b
+            m_term = (1. - (24./ ((m * pi) ** 2))) * (a / b)
+            n_term = (1. - (8. / ((n * pi) ** 2))) * (b / a)
+
+    else:
+        A = (2.*m*n*pi/15.)*(arf**3)*(gamma**6)
+        B = arf*m*n*pi*(gamma**2)*(5./64.)
+        m_term = (1. - (24. / ((m * pi) ** 2))) * (a / b)
+        n_term = (1. - (24. / ((n * pi) ** 2))) * (b / a)
+
+
+    S_mn = A*(1.-(m_term + n_term)*B)
+
+    return S_mn, gamma
+
+def flex_rig_sandwich(E_fs,t_fs,h_core,v_fs):
+    D = E_fs*t_fs*((h_core+t_fs)**2)/(2*((1-(v_fs**2))))
+    return D
+
+def shear_rig_sandwich(G_core,t_fs,h_core):
+    N = G_core*h_core*((1+(t_fs/h_core))**2)
+    return N
+
+def panel_wavespeed_sandwich(N,u_s,D,omega):
+    num = 2*N
+    denom_a = u_s
+    denom_b = np.sqrt((u_s**2)+((4*u_s*(N**2))/((omega**2)*D)))
+    denom = denom_a+denom_b
+
+    c_b_2 = num/denom
+    c_b = np.sqrt(c_b_2)
+    return c_b
+
+def critical_frq_panel(c_B,c_0,omega):
+    i = np.argmin(np.abs(c_B-c_0))
+    omega_cr = omega[i]
+    return omega_cr
+
+def critical_frq_sandwich(D,N,u_s,c_0):
+    omega_cr_2 = ((c_0**4)*u_s/D)*(1./((1.-((c_0**2)*u_s/N))))
+    omega_cr = np.sqrt(omega_cr_2)
+    return omega_cr
+
+def gauleg(X1,X2,N):
+    eps = 3e-14
+    M = (N+1)/2
+
+    XM = 0.5*(X2+X1)
+    XL = 0.5*(X2-X1)
+
+    X = np.zeros(N)
+    W = np.zeros(N)
+
+    for i in range(M):
+        i+=1
+        Z = cos(pi*(i-0.25)/(N+0.5))
+        Z1 = -100000
+
+        while np.abs(Z-Z1) > eps:
+            P1 = 1
+            P2 = 0
+            for j in range(N):
+                j+=1
+                P3 = P2
+                P2 = P1
+                P1 = ((2*j-1)*Z*P2-(j-1)*P3)/j
+            PP = N*(Z*P1-P2)/(Z*Z-1)
+            Z1 = Z
+            Z = Z1-P1/PP
+        i-=1
+        X[i] = XM-XL*Z
+        X[-i-1] = XM+XL*Z
+        W[i]= 2*XL/((1-Z**2)*PP**2)
+        W[-i-1] = W[i]
+
+    return X,W

@@ -197,7 +197,6 @@ def RadEff_Plot_lowIntDens(ab_array,mn_array,title_str):
     return 0
 
 
-
 def rad_eff_Wallace(a,b,m,n,N,k):
     start = time.time()
     A = 64.*(k**2)*a*b/((pi**6)*(m*n)**2)
