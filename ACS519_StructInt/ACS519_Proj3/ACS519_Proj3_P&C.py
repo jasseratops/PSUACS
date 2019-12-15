@@ -16,6 +16,7 @@ def part1():
     n = modal_density()
     tl = transmission_loss()
 
+
     c_0= 343.
     rho_0 = 1.29
     f = third_oct_band(20,10000,center=True)
