@@ -8,6 +8,7 @@ import ACS519_StructInt.soundStructInt as ssint
 
 
 def main(args):
+    # eta_p,E_p,v_p,rho_p,l2_p1,l2_p2,c_cav,rho_cav
     part1()
     return 0
 
@@ -16,8 +17,8 @@ def part1():
     n = modal_density()
     tl = transmission_loss()
 
-
     c_0= 343.
+    c_cav=c_0
     rho_0 = 1.29
     f = third_oct_band(20,10000,center=True)
     f = np.append(f,10**4)
@@ -45,53 +46,66 @@ def part1():
 
 
     ### Material Properties for Aluminum (6061-T6)
-    E_Al = 69.1E9  # Pa
-    v_Al = 0.3  #
-    rho_Al = 2673.  # kg/m^3
+    E_p = 69.1E9  # Pa
+    v_p = 0.3  #
+    rho_p = 2673.  # kg/m^3
 
-    ### Aluminum Panel dimensions
-    l1_p = l1_c         # Panel Width
-    l2_p = 3.18E-3      # Panel Thickness
-    l3_p = l3_c         # Panel Height
+    ### Panel 1 dimensions
+    l1_p1 = l1_c         # Panel Width
+    l2_p1 = 3.18E-3      # Panel Thickness
+    l3_p1 = l3_c         # Panel Height
 
-    M_panel = l1_p*l2_p*l3_p*rho_Al
+    ### Panel 2 dimensions
+    l1_p2 = l1_c         # Panel Width
+    l2_p2 = 3.18E-3      # Panel Thickness
+    l3_p2 = l3_c         # Panel Height
 
-    c_Al, c_Al_Mindlin, c_Al_thin = ssint.plate_phase_speed(l2_p, v_Al, E_Al, rho_Al, omega, K=5.6, eta=eta_2)
-    omega_c = ssint.critical_frq_panel(c_B=c_Al,c_0=c_0,omega=omega)
-    f_c = omega_c/(2*pi)
+    M_p1 = l1_p1*l2_p1*l3_p1*rho_p
+    M_p2 = l1_p2*l2_p2*l3_p2*rho_p
 
-    print "Critical Frq: " + str(f_c)
-    #f = np.sort(np.append(f,f_c))
-    omega = 2*pi*f
+    c_p1, _, _ = ssint.plate_phase_speed(l2_p1, v_p, E_p, rho_p, omega, K=5.6, eta=eta_2)
+    c_p2, _, _ = ssint.plate_phase_speed(l2_p2, v_p, E_p, rho_p, omega, K=5.6, eta=eta_4)
+
+    omega_c_p1 = ssint.critical_frq_panel(c_B=c_p1,c_0=c_0,omega=omega)
+    omega_c_p2 = ssint.critical_frq_panel(c_B=c_p2,c_0=c_0,omega=omega)
+
+    f_c_p1 = omega_c_p1/(2.*pi)
+    f_c_p2 = omega_c_p2/(2.*pi)
+
+    print "Critical Frq (panel 1): " + str(f_c_p1)
+    print "Critical Frq (panel 2): " + str(f_c_p2)
+
     alpha_0 = absorption_coefficient(f)
 
     ### cavity loss factor
-    eta_3 = eta.cavity(f,c_0,l1_c,l2_c,l3_c,alpha_0)
+    eta_3 = eta.cavity(f,c_cav,l1_c,l2_c,l3_c,alpha_0)
 
-    ### Cavity radiation efficiency
-    R_rad_2,rad_eff_2 = halfSpace_radRes(f,f_c,l1_p,l3_p,rho_0,c_0)
+    ### Panel radiation efficiency
+    R_rad_p1,rad_eff_p1 = halfSpace_radRes(f,f_c_p1,l1_p1,l3_p1,rho_0,c_0)
+    R_rad_p2,rad_eff_p2 = halfSpace_radRes(f,f_c_p2,l1_p2,l3_p2,rho_0,c_0)
 
 
     ### Model Densities
     n1 = n.room(f,l1_r,l2_r,l3_r,c_0)
-    n2 = n.panel(f,c_Al,l1_p,l3_p)
-    n3 = n.cavity(f,c_0,l1_p,l3_p,l2_c)
-    n3_fake = n.room(f,l1_p,l3_p,l2_c,c_0,cavity=True)
-    n4 = n.panel(f,c_Al,l1_p,l3_p)
+    n2 = n.panel(f,c_p1,l1_p1,l3_p1)
+    n3 = n.cavity(f,c_0,l1_c,l3_c,l2_c)
+    n3_fake = n.room(f,l1_c,l3_c,l2_c,c_cav,cavity=True)
+    n4 = n.panel(f,c_p2,l1_p2,l3_p2)
     n5 = n.room(f,l1_r,l2_r,l3_r,c_0)
 
-    TL_13 = tl.rand_inc_TL(f,rho_Al,l2_p,rho_0,c_0)
+    TL_13 = tl.rand_inc_TL(f,rho_p,l2_p1,rho_0,c_0)
+    TL_53 = tl.rand_inc_TL(f,rho_p,l2_p2,rho_0,c_0)
 
     A2 = l1_c*l3_c
     V1 = l1_r*l2_r*l3_r
 
     ### Loss factors
-    eta_21 = eta.panel_to_room(f,R_rad_2,M_panel,f_c)
-    eta_23 = eta.panel_to_cav(f, R_rad_2,M_panel,f_c)
-    eta_45 = eta.panel_to_room(f,R_rad_2,M_panel,f_c)
-    eta_43 = eta.panel_to_cav(f, R_rad_2,M_panel,f_c)
+    eta_21 = eta.panel_to_room(f,R_rad_p1,M_p1,f_c_p1)
+    eta_23 = eta.panel_to_cav(f, R_rad_p1,M_p1,f_c_p1)
+    eta_45 = eta.panel_to_room(f,R_rad_p2,M_p2,f_c_p2)
+    eta_43 = eta.panel_to_cav(f, R_rad_p2,M_p2,f_c_p2)
     eta_13 = eta.room_to_cav(f,TL_13,A2,V1,c_0)
-    eta_53 = eta.room_to_cav(f,TL_13,A2,V1,c_0)
+    eta_53 = eta.room_to_cav(f,TL_53,A2,V1,c_0)
 
     ### converse loss fators
     eta_12 = eta.coupling_loss_factor(eta_21,n1,n2)
@@ -119,16 +133,8 @@ def part1():
     eta_44 = eta_4 + (eta_41 + eta_42 + eta_43 + eta_45)
     eta_55 = eta_5 + (eta_51 + eta_52 + eta_53 + eta_54)
 
-    '''
-    row1 = np.array([eta_11, -eta_21, -eta_31, -eta_41, -eta_51])
-    row2 = np.array([-eta_12, eta_22, -eta_32, -eta_42, -eta_52])
-    row3 = np.array([-eta_13, -eta_23, eta_33, -eta_43, -eta_53])
-    row4 = np.array([-eta_14, -eta_24, -eta_34, eta_44, -eta_54])
-    row5 = np.array([-eta_15, -eta_25, -eta_35, -eta_45, eta_55])
-    '''
 
     TL_15 = np.zeros_like(f)
-
     for i in range(len(f)):
         eta_mtx = 2*pi*f[i]* np.array([[eta_11[i], -eta_21[i], -eta_31[i], -eta_41[i], -eta_51[i]],
                                        [-eta_12[i], eta_22[i], -eta_32[i], -eta_42[i], -eta_52[i]],
@@ -145,17 +151,6 @@ def part1():
         TL_15[i] = 10.*log10(E_1/E_5)
 
 
-    '''
-    P1 = np.ones_like(f)
-    P2 = np.zeros_like(f)
-    P3 = np.zeros_like(f)
-    P4 = np.zeros_like(f)
-    P5 = np.zeros_like(f)
-    
-    P_mtx = np.array([P1,P2,P3,P4,P5])
-    E_mtx = lin.solve(omega*eta_mtx,P_mtx)
-   '''
-
 
     '''
     plt.figure()
@@ -165,7 +160,7 @@ def part1():
     plt.grid(which="both")
     '''
     plt.figure()
-    plt.loglog(f,rad_eff_2)
+    plt.loglog(f,rad_eff_p1)
     plt.xlim(100.,10000.)
     plt.ylim(1.E-3,1.E1)
     plt.grid(which="both")
@@ -188,15 +183,14 @@ def part1():
 
     plt.figure()
     plt.semilogx(f,TL_15)
-    plt.axvline(f_c)
     plt.xlim(100,10000)
     plt.ylim(0,75)
     plt.grid(which="both")
-
+    '''
     plt.figure()
     plt.loglog(f,eta_12)
     plt.loglog(f,eta_21)
-
+    '''
     plt.ylim(1E-7,1E-1)
     plt.xlim(100,10000)
     plt.grid(which="both")
@@ -263,7 +257,7 @@ def absorption_coefficient(f):
 
     return alpha_0
 
-def halfSpace_radRes(f, f_c, l1, l3, rho, c_0):
+def halfSpace_radRes(f, f_c, l1, l3, rho_0, c_0):
     wl_c = c_0 / f_c
 
     A = l1 * l3
@@ -272,7 +266,7 @@ def halfSpace_radRes(f, f_c, l1, l3, rho, c_0):
     g_1 = np.zeros(len(f))
     g_2 = np.zeros(len(f))
 
-    fact = A * rho * c_0
+    fact = A * rho_0 * c_0
 
     for i in range(len(rad_eff)):
         wl_a = c_0 / f[i]
@@ -301,12 +295,12 @@ class loss_factor:
     def __init__(self):
         return None
 
-    def cavity(self,f, c_cav, l1, l2, l3, alpha_0):
+    def cavity(self, f, c_cav, l1_c, l2_c, l3_c, alpha_0):
         omega = 2 * pi * f
-        S = 2 * ((l1 * l2) + (l2 * l3))
-        V = l1 * l2 * l3
+        S = 2 * ((l1_c * l2_c) + (l2_c * l3_c))
+        V = l1_c * l2_c * l3_c
         eta_cav = np.zeros(len(omega))
-        test_cond = c_cav / (2. * l2)
+        test_cond = c_cav / (2. * l2_c)
 
         for i in range(len(eta_cav)):
             if f[i] < test_cond:
@@ -339,9 +333,9 @@ class loss_factor:
 
         return eta_panelCav
 
-    def room_to_cav(self,f,TL,panel_area,room_volume,c_0):
-        A2 = panel_area
-        V1 = room_volume
+    def room_to_cav(self, f, TL, A_p, V_r, c_0):
+        A2 = A_p
+        V1 = V_r
         omega = 2.*pi*f
         eta_roomCav = 10.**((-TL+(10.*np.log10(A2*c_0/(4.*V1*omega))))/10.)
         return eta_roomCav
@@ -354,10 +348,10 @@ class modal_density:
     def __init__(self):
         return None
 
-    def room(self,f, room_width, room_depth, room_length, c_0,cavity=False):
-        l1 = room_width
-        l2 = room_depth
-        l3 = room_length
+    def room(self, f, l1_r, l2_r, l3_r, c_0, cavity=False):
+        l1 = l1_r
+        l2 = l2_r
+        l3 = l3_r
 
         omega = 2 * pi * f
         V = l1 * l2 * l3
@@ -376,21 +370,21 @@ class modal_density:
 
         return n_room
 
-    def panel(self,f,c_B,panel_length,panel_width):
+    def panel(self, f, c_B, l1_p, l3_p):
         omega = 2*pi*f
-        A = panel_length*panel_width
+        A = l1_p * l3_p
         n_panel = A*omega/(4*pi*(c_B**2))
 
         return n_panel
 
-    def cavity(self, f, c_cav, panel_length, panel_width, cavity_thickness):
-        test_cond = c_cav / (2 * cavity_thickness)
+    def cavity(self, f, c_cav, l1_c, l3_c, l2_c):
+        test_cond = c_cav / (2 * l2_c)
         omega = 2*pi*f
         n_cavity = np.zeros(len(omega))
 
-        n_room = self.room(f,panel_width,panel_length,cavity_thickness,c_cav,cavity=True)
+        n_room = self.room(f, l3_c, l1_c, l2_c, c_cav, cavity=True)
 
-        A = panel_length*panel_width
+        A = l1_c * l3_c
 
         for i in range(len(omega)):
             if f[i] < test_cond:
@@ -404,10 +398,10 @@ class transmission_loss:
     def __init__(self):
         return None
 
-    def zero_inc_TL(self,f,rho_panel,panel_thickness,rho_fluid,c_fluid):
-        rho_s = rho_panel*panel_thickness
-        rho = rho_fluid
-        c = c_fluid
+    def zero_inc_TL(self, f, rho_p, l2_p, rho_0, c_0):
+        rho_s = rho_p * l2_p
+        rho = rho_0
+        c = c_0
         omega = 2.*pi*f
 
         inner = 1. + ((omega * rho_s / (2 * rho * c))**2)
@@ -415,8 +409,8 @@ class transmission_loss:
 
         return TL_0
 
-    def rand_inc_TL(self,f,rho_panel,panel_thickness,rho_fluid,c_fluid):
-        TL_0 = self.zero_inc_TL(f,rho_panel,panel_thickness,rho_fluid,c_fluid)
+    def rand_inc_TL(self, f, rho_p, l2_p, rho_0, c_0):
+        TL_0 = self.zero_inc_TL(f, rho_p, l2_p, rho_0, c_0)
 
         TL_rand = TL_0 - 10*np.log10(0.23*TL_0)
 
