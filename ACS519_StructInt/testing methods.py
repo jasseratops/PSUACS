@@ -22,6 +22,11 @@ def main(args):
     a = testFuncs()
     a.func1()
 
+    try:
+        a = 1/0
+    except RuntimeError:
+        print "oh no"
+
     return 0
 
 
