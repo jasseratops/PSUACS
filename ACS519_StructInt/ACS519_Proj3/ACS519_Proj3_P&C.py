@@ -68,7 +68,7 @@ def part1():
     eta_3 = eta.cavity(f,c_0,l1_c,l2_c,l3_c,alpha_0)
 
     ### Cavity radiation efficiency
-    R_rad_2,rad_eff_2 = halfSpace_radRes(f,f_c,l1_c,l2_c,l3_c,rho_Al,c_0)
+    R_rad_2,rad_eff_2 = halfSpace_radRes(f,f_c,l1_p,l3_p,rho_0,c_0)
 
 
     ### Model Densities
@@ -196,7 +196,7 @@ def part1():
     plt.loglog(f,eta_12)
     plt.loglog(f,eta_21)
 
-    #plt.ylim(1E-7,1E-1)
+    plt.ylim(1E-7,1E-1)
     plt.xlim(100,10000)
     plt.grid(which="both")
 
@@ -262,31 +262,27 @@ def absorption_coefficient(f):
 
     return alpha_0
 
-def halfSpace_radRes(f,f_c,l1,l2,l3,rho,c_cav):
-    wl_c = c_cav/f_c
+def halfSpace_radRes(f, f_c, l1, l3, rho, c_0):
+    wl_c = c_0 / f_c
 
-    #A = 2 * ((l1 * l2) + (l1 * l3) + (l2 * l3))
-    A = l1*l3
-    #P = 4 * (l1 + l2 + l3)
-    P = 2 * (l1*l3)
+    A = l1 * l3
+    P = 2 * (l1+l3)
     rad_eff = np.zeros(len(f))
     g_1 = np.zeros(len(f))
     g_2 = np.zeros(len(f))
 
-    fact = A*rho*c_cav
+    fact = A * rho * c_0
 
     for i in range(len(rad_eff)):
-        wl_a = c_cav / f[i]
-        a = (f[i] / f_c) ** (0.5)
+        wl_a = c_0 / f[i]
+        a = (f[i] / f_c)**0.5
 
         if f[i] < (0.5*f_c):
-            g_1[i] = (4/(pi**4))*(1-(2*(a**2)))/(a*(1-(a**2))**(0.5))
+            g_1[i] = (4./(pi**4))*(1.-(2.*(a**2)))/(a*(1-((a**2))**(0.5)))
         else:
             g_1[i] = 0.
-        try:
-            g_2[i] = ((2*pi)**(-2))*((1-(a**2))*np.log((1+a)/(1-a))+(2*a))/((1-(a**2))**(3./2.))
-        except Exception:
-            print str(0)
+
+        g_2[i] = ((2*pi)**(-2)) * ((1.-(a**2))*np.log((1+a)/(1-a))+(2*a)) / ((1-(a**2))**(3./2.))
 
 
         if f[i] < f_c:
@@ -321,22 +317,22 @@ class loss_factor:
 
     def panel_to_room(self,f,R_rad, M_panel, f_c):
         eta_panelRoom = np.zeros(len(f))
-        omega = 2 * pi * f
+        omega = 2. * pi * f
 
         for i in range(len(f)):
             if f[i] < f_c:
-                eta_panelRoom[i] = 2 * R_rad[i] / (omega[i] * M_panel)
+                eta_panelRoom[i] = 2. * R_rad[i] / (omega[i] * M_panel)
             else:
                 eta_panelRoom[i] = R_rad[i] / (omega[i] * M_panel)
         return eta_panelRoom
 
     def panel_to_cav(self,f, R_rad, M_panel, f_c):
         eta_panelCav = np.zeros(len(f))
-        omega = 2 * pi * f
+        omega = 2. * pi * f
 
         for i in range(len(f)):
             if f[i] < f_c:
-                eta_panelCav[i] = 4 * R_rad[i] / (omega[i] * M_panel)
+                eta_panelCav[i] = 4. * R_rad[i] / (omega[i] * M_panel)
             else:
                 eta_panelCav[i] = R_rad[i] / (omega[i] * M_panel)
 
